@@ -1,5 +1,33 @@
 models:
-    Book: { title: string, author: string, description: text }
-    Contact: { name: string }
-    Post: { title: string, content: text }
-    User: { name: string, email: string, email_verified_at: 'timestamp nullable', password: 'string nullable', remember_token: 'string:100 nullable', avatar_url: 'string nullable' }
+    LearningArea:
+        name: string
+        slug: string
+        description: text nullable
+        is_active: boolean default:true
+
+    Program:
+        learning_area_id: foreignId
+        title: string
+        slug: string
+        description: text nullable
+        level: enum:pemula,menengah,lanjutan default:pemula
+        estimated_minutes: integer nullable
+        is_published: boolean default:false
+
+    Unit:
+        program_id: foreignId
+        title: string
+        slug: string
+        summary: text nullable
+        order: integer default:1
+        is_visible: boolean default:true
+
+    Material:
+        unit_id: foreignId
+        title: string
+        type: enum:text,video,file,quiz
+        content: text nullable
+        duration_minutes: integer nullable
+        order: integer default:1
+        is_mandatory: boolean default:true
+        is_visible: boolean default:true
