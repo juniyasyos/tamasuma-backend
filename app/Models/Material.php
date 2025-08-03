@@ -4,22 +4,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
+use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Material extends Model
+class Material extends Model implements HasMedia
 {
-    /** @use HasFactory<\Database\Factories\MaterialFactory> */
     use HasFactory, InteractsWithMedia;
 
-    // add guaded
     protected $guarded = ['id'];
-    // add hidden
     protected $hidden = ['created_at', 'updated_at'];
-    // add fillable
 
     protected $fillable = [
         'unit_id',
         'title',
+        'slug',
         'type',
         'content',
         'duration_minutes',
@@ -36,5 +35,33 @@ class Material extends Model
     public function materials()
     {
         return $this->hasMany(Material::class)->orderBy('order');
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (self $material) {
+            if (empty($material->slug)) {
+                $material->slug = static::generateUniqueSlug($material->title);
+            }
+        });
+
+        static::updating(function (self $material) {
+            if (empty($material->slug)) {
+                $material->slug = static::generateUniqueSlug($material->title);
+            }
+        });
+    }
+
+    protected static function generateUniqueSlug(string $title): string
+    {
+        $baseSlug = Str::slug($title);
+        $slug = $baseSlug;
+        $counter = 1;
+
+        while (static::where('slug', $slug)->exists()) {
+            $slug = $baseSlug . '-' . $counter++;
+        }
+
+        return $slug;
     }
 }

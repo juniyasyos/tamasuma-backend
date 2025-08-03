@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('unit_id')->constrained()->onDelete('cascade');
             $table->string('title');
+            $table->string('slug')->unique();
             $table->enum('type', ['text', 'video', 'file', 'quiz']);
             $table->text('content')->nullable(); 
             $table->unsignedInteger('duration_minutes')->nullable();

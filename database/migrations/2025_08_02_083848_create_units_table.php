@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('title');
             $table->string('slug')->unique();
             $table->text('summary')->nullable();
-            $table->unsignedInteger('order')->default(1); // urutan tampil
+            $table->unsignedInteger('order'); 
             $table->boolean('is_visible')->default(true);
             $table->timestamps();
         });

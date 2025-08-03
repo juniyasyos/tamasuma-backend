@@ -69,6 +69,7 @@ class AdminPanelProvider extends PanelProvider
                 Pages\Dashboard::class,
             ])
             ->navigationGroups([
+                'Content Management',
                 'User Management',
                 'Settings',
                 'System & Configurations',
