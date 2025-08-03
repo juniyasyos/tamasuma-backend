@@ -35,29 +35,10 @@ class Program extends Model
 
     protected static function booted(): void
     {
-        static::creating(function (self $program) {
-            if (empty($program->slug)) {
-                $program->slug = static::generateUniqueSlug($program->title);
-            }
+        parent::boot();
+
+        static::saving(function ($model) {
+            $model->slug = Str::slug($model->title);
         });
-
-        static::updating(function (self $program) {
-            if (empty($program->slug)) {
-                $program->slug = static::generateUniqueSlug($program->title);
-            }
-        });
-    }
-
-    protected static function generateUniqueSlug(string $title): string
-    {
-        $baseSlug = Str::slug($title);
-        $slug = $baseSlug;
-        $counter = 1;
-
-        while (static::where('slug', $slug)->exists()) {
-            $slug = $baseSlug . '-' . $counter++;
-        }
-
-        return $slug;
     }
 }

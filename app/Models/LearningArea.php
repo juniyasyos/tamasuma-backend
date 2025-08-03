@@ -27,14 +27,11 @@ class LearningArea extends Model
 
     protected static function booted(): void
     {
-        static::creating(function (self $model) {
-            $model->slug = $model->slug ?? Str::slug($model->name);
-        });
+        parent::boot();
 
-        static::updating(function (self $model) {
-            if ($model->isDirty('name') && empty($model->slug)) {
-                $model->slug = Str::slug($model->name);
-            }
+        static::saving(function ($model) {
+            $model->slug = Str::slug($model->name);
         });
     }
 }
+        

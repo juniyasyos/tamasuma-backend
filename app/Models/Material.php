@@ -39,29 +39,10 @@ class Material extends Model implements HasMedia
 
     protected static function booted(): void
     {
-        static::creating(function (self $material) {
-            if (empty($material->slug)) {
-                $material->slug = static::generateUniqueSlug($material->title);
-            }
+        parent::boot();
+
+        static::saving(function ($model) {
+            $model->slug = Str::slug($model->title);
         });
-
-        static::updating(function (self $material) {
-            if (empty($material->slug)) {
-                $material->slug = static::generateUniqueSlug($material->title);
-            }
-        });
-    }
-
-    protected static function generateUniqueSlug(string $title): string
-    {
-        $baseSlug = Str::slug($title);
-        $slug = $baseSlug;
-        $counter = 1;
-
-        while (static::where('slug', $slug)->exists()) {
-            $slug = $baseSlug . '-' . $counter++;
-        }
-
-        return $slug;
     }
 }

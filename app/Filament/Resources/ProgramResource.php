@@ -4,11 +4,15 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProgramResource\Pages;
 use App\Models\Program;
+use DutchCodingCompany\FilamentSocialite\View\Components\Buttons;
 use Filament\Forms;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Form;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Tabs;
+use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -27,65 +31,83 @@ class ProgramResource extends Resource
     protected static ?string $navigationGroup = 'Content Management';
     protected static ?string $navigationLabel = 'Program Pembelajaran';    // Label di sidebar
     protected static ?string $pluralModelLabel = 'Program';                // Untuk judul halaman list
-    protected static ?string $modelLabel = 'Program';                      // Untuk halaman detail/singular
-    
+    protected static ?string $modelLabel = 'Program Pembelajaran';                      // Untuk halaman detail/singular
+
     public static function form(Form $form): Form
     {
         return $form->schema([
-            Section::make('Informasi Program')
-                ->description('Masukkan detail program pelatihan secara lengkap.')
-                ->schema([
-                    Grid::make(2)->schema([
-                        Select::make('learning_area_id')
-                            ->label('Bidang Pembelajaran')
-                            ->relationship('learningArea', 'name')
-                            ->searchable()
-                            ->preload()
-                            ->required(),
+            Tabs::make('Program Tabs')
+                ->columnSpanFull()
+                ->tabs([
+                    Tab::make('Informasi Dasar')
+                        ->schema([
+                            Section::make('Informasi Program')
+                                ->description('Masukkan detail program pelatihan secara lengkap.')
+                                ->schema([
+                                    Grid::make(2)->schema([
+                                        Select::make('learning_area_id')
+                                            ->label('Bidang Pembelajaran')
+                                            ->relationship('learningArea', 'name')
+                                            ->searchable()
+                                            ->preload()
+                                            ->required(),
 
-                        Select::make('level')
-                            ->label('Tingkat')
-                            ->options([
-                                'pemula' => 'Pemula',
-                                'menengah' => 'Menengah',
-                                'lanjutan' => 'Lanjutan',
-                            ])
-                            ->default('pemula')
-                            ->required(),
-                    ]),
+                                        ToggleButtons::make('level')
+                                            ->label('Tingkat')
+                                            ->options([
+                                                'pemula' => 'Pemula',
+                                                'menengah' => 'Menengah',
+                                                'lanjutan' => 'Lanjutan',
+                                            ])
+                                            ->colors([
+                                                'pemula' => 'success',
+                                                'menengah' => 'warning',
+                                                'lanjutan' => 'primary',
 
-                    Grid::make(2)->schema([
-                        TextInput::make('title')
-                            ->label('Judul Program')
-                            ->required()
-                            ->maxLength(100),
+                                            ])
+                                            ->inline()
+                                            ->default('pemula')
+                                            ->required(),
+                                    ]),
 
-                        TextInput::make('slug')
-                            ->label('Slug URL')
-                            ->readOnly()
-                            ->helperText('Otomatis dari judul jika dikosongkan.')
-                            ->unique(ignoreRecord: true)
-                            ->maxLength(100),
-                    ]),
+                                    Grid::make(2)->schema([
+                                        TextInput::make('title')
+                                            ->label('Judul Program')
+                                            ->required()
+                                            ->maxLength(100),
 
-                    Textarea::make('description')
-                        ->label('Deskripsi')
-                        ->rows(4)
-                        ->placeholder('Deskripsikan secara ringkas dan jelas...'),
+                                        TextInput::make('slug')
+                                            ->label('Slug URL')
+                                            ->readOnly()
+                                            ->helperText('Otomatis dari judul jika dikosongkan.')
+                                            ->unique(ignoreRecord: true)
+                                            ->maxLength(100),
+                                    ]),
 
-                    Grid::make(2)->schema([
-                        TextInput::make('estimated_minutes')
-                            ->label('Durasi (menit)')
-                            ->numeric()
-                            ->suffix('menit')
-                            ->helperText('Estimasi waktu penyelesaian program'),
+                                    Textarea::make('description')
+                                        ->label('Deskripsi')
+                                        ->rows(4)
+                                        ->placeholder('Deskripsikan secara ringkas dan jelas...'),
 
-                        Toggle::make('is_published')
-                            ->label('Publikasikan Program')
-                            ->inline(false)
-                            ->default(true),
-                    ]),
+                                    Grid::make(2)->schema([
+                                        TextInput::make('estimated_minutes')
+                                            ->label('Durasi (menit)')
+                                            ->numeric()
+                                            ->suffix('menit')
+                                            ->helperText('Estimasi waktu penyelesaian program'),
 
+                                        Toggle::make('is_published')
+                                            ->label('Publikasikan Program')
+                                            ->inline(false)
+                                            ->default(true),
+                                    ]),
+                                ]),
+                        ]),
+
+                    Tab::make('List')
+                        ->schema([
+                            
+                        ]),
                 ]),
         ]);
     }

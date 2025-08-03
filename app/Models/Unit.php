@@ -34,29 +34,10 @@ class Unit extends Model
 
     protected static function booted(): void
     {
-        static::creating(function (self $unit) {
-            if (empty($unit->slug)) {
-                $unit->slug = static::generateUniqueSlug($unit->title);
-            }
+        parent::boot();
+
+        static::saving(function ($model) {
+            $model->slug = Str::slug($model->title);
         });
-
-        static::updating(function (self $unit) {
-            if (empty($unit->slug)) {
-                $unit->slug = static::generateUniqueSlug($unit->title);
-            }
-        });
-    }
-
-    protected static function generateUniqueSlug(string $title): string
-    {
-        $baseSlug = Str::slug($title);
-        $slug = $baseSlug;
-        $counter = 1;
-
-        while (static::where('slug', $slug)->exists()) {
-            $slug = $baseSlug . '-' . $counter++;
-        }
-
-        return $slug;
     }
 }

@@ -18,8 +18,13 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->text('description')->nullable();
             $table->enum('level', ['pemula', 'menengah', 'lanjutan'])->default('pemula');
-            $table->integer('estimated_minutes')->nullable(); 
             $table->boolean('is_published')->default(false);
+
+            $table->enum('source', ['internal', 'external'])->default('internal');
+            $table->string('platform')->nullable();
+            $table->string('external_url')->nullable();
+            $table->boolean('is_certified')->default(false);
+
             $table->timestamps();
         });
     }
