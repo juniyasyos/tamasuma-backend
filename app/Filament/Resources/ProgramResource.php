@@ -22,6 +22,7 @@ use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 
 class ProgramResource extends Resource
 {
@@ -29,9 +30,9 @@ class ProgramResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Content Management';
-    protected static ?string $navigationLabel = 'Program Pembelajaran';    // Label di sidebar
-    protected static ?string $pluralModelLabel = 'Program';                // Untuk judul halaman list
-    protected static ?string $modelLabel = 'Program Pembelajaran';                      // Untuk halaman detail/singular
+    protected static ?string $navigationLabel = 'Program Pembelajaran';
+    protected static ?string $pluralModelLabel = 'Program';
+    protected static ?string $modelLabel = 'Program Pembelajaran';
 
     public static function form(Form $form): Form
     {
@@ -39,74 +40,59 @@ class ProgramResource extends Resource
             Tabs::make('Program Tabs')
                 ->columnSpanFull()
                 ->tabs([
-                    Tab::make('Informasi Dasar')
+
+                    Tab::make('Sumber Program')
                         ->schema([
-                            Section::make('Informasi Program')
-                                ->description('Masukkan detail program pelatihan secara lengkap.')
+                            Section::make('Asal Program')
+                                ->description('Tentukan apakah program ini berasal dari internal atau eksternal.')
                                 ->schema([
-                                    Grid::make(2)->schema([
-                                        Select::make('learning_area_id')
-                                            ->label('Bidang Pembelajaran')
-                                            ->relationship('learningArea', 'name')
-                                            ->searchable()
-                                            ->preload()
-                                            ->required(),
+                                    ToggleButtons::make('source')
+                                        ->label('Sumber Program')
+                                        ->options([
+                                            'internal' => 'Internal',
+                                            'external' => 'Eksternal',
+                                        ])
+                                        ->colors([
+                                            'internal' => 'gray',
+                                            'external' => 'info',
+                                        ])
+                                        ->icons([
+                                            'internal' => 'heroicon-o-building-library',
+                                            'external' => 'heroicon-o-globe-alt',
+                                        ])
+                                        ->inline()
+                                        ->default('internal')
+                                        ->required(),
 
-                                        ToggleButtons::make('level')
-                                            ->label('Tingkat')
-                                            ->options([
-                                                'pemula' => 'Pemula',
-                                                'menengah' => 'Menengah',
-                                                'lanjutan' => 'Lanjutan',
-                                            ])
-                                            ->colors([
-                                                'pemula' => 'success',
-                                                'menengah' => 'warning',
-                                                'lanjutan' => 'primary',
+                                    TextInput::make('platform')
+                                        ->label('Platform')
+                                        ->placeholder('Contoh: Coursera, Dicoding, Udemy')
+                                        ->visible(fn($get) => $get('source') === 'external'),
 
-                                            ])
-                                            ->inline()
-                                            ->default('pemula')
-                                            ->required(),
-                                    ]),
+                                    TextInput::make('external_url')
+                                        ->label('Link Program')
+                                        ->placeholder('https://')
+                                        ->url()
+                                        ->suffixIcon('heroicon-o-arrow-top-right-on-square')
+                                        ->visible(fn($get) => $get('source') === 'external'),
 
-                                    Grid::make(2)->schema([
-                                        TextInput::make('title')
-                                            ->label('Judul Program')
-                                            ->required()
-                                            ->maxLength(100),
-
-                                        TextInput::make('slug')
-                                            ->label('Slug URL')
-                                            ->readOnly()
-                                            ->helperText('Otomatis dari judul jika dikosongkan.')
-                                            ->unique(ignoreRecord: true)
-                                            ->maxLength(100),
-                                    ]),
-
-                                    Textarea::make('description')
-                                        ->label('Deskripsi')
-                                        ->rows(4)
-                                        ->placeholder('Deskripsikan secara ringkas dan jelas...'),
-
-                                    Grid::make(2)->schema([
-                                        TextInput::make('estimated_minutes')
-                                            ->label('Durasi (menit)')
-                                            ->numeric()
-                                            ->suffix('menit')
-                                            ->helperText('Estimasi waktu penyelesaian program'),
-
-                                        Toggle::make('is_published')
-                                            ->label('Publikasikan Program')
-                                            ->inline(false)
-                                            ->default(true),
-                                    ]),
+                                    ToggleButtons::make('is_certified')
+                                        ->label('Sertifikat')
+                                        ->options([
+                                            true => 'Ada Sertifikat',
+                                            false => 'Tanpa Sertifikat',
+                                        ])
+                                        ->icons([
+                                            true => 'heroicon-o-check-badge',
+                                            false => 'heroicon-o-x-mark',
+                                        ])
+                                        ->colors([
+                                            true => 'success',
+                                            false => 'gray',
+                                        ])
+                                        ->inline()
+                                        ->default(false),
                                 ]),
-                        ]),
-
-                    Tab::make('List')
-                        ->schema([
-                            
                         ]),
                 ]),
         ]);
@@ -137,11 +123,20 @@ class ProgramResource extends Resource
                         default => 'gray',
                     }),
 
-                TextColumn::make('estimated_minutes')
-                    ->label('Durasi')
-                    ->suffix(' menit')
-                    ->alignEnd()
-                    ->sortable(),
+                TextColumn::make('source')
+                    ->label('Sumber')
+                    ->badge()
+                    ->color(fn(string $state) => match ($state) {
+                        'internal' => 'gray',
+                        'external' => 'info',
+                        default => 'gray',
+                    }),
+
+                TextColumn::make('platform')
+                    ->label('Platform'),
+
+                ToggleColumn::make('is_certified')
+                    ->label('Sertifikat'),
 
                 ToggleColumn::make('is_published')
                     ->label('Terbitkan'),
@@ -161,6 +156,7 @@ class ProgramResource extends Resource
                 ]),
             ]);
     }
+
 
     public static function getRelations(): array
     {

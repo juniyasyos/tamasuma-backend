@@ -19,8 +19,11 @@ class Program extends Model
         'slug',
         'description',
         'level',
-        'estimated_minutes',
         'is_published',
+        'source',
+        'platform',
+        'external_url',
+        'is_certified',
     ];
 
     public function learningArea()
@@ -35,10 +38,20 @@ class Program extends Model
 
     protected static function booted(): void
     {
-        parent::boot();
-
         static::saving(function ($model) {
-            $model->slug = Str::slug($model->title);
+            if (empty($model->slug)) {
+                $model->slug = Str::slug($model->title);
+            }
         });
+    }
+
+    public function isExternal(): bool
+    {
+        return $this->source === 'external';
+    }
+
+    public function isInternal(): bool
+    {
+        return $this->source === 'internal';
     }
 }
