@@ -32,7 +32,7 @@ class AppServiceProvider extends ServiceProvider
         });
         // Gate::policy()
         Event::listen(function (\SocialiteProviders\Manager\SocialiteWasCalled $event) {
-            $event->extendSocialite('discord', \SocialiteProviders\Google\Provider::class);
+            $event->extendSocialite('google', \SocialiteProviders\Google\Provider::class);
         });
     }
 }
