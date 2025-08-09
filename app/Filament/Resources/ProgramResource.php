@@ -424,7 +424,9 @@ class ProgramResource extends Resource
 
     public static function getRelations(): array
     {
-        return [];
+        return [
+            ProgramResource\RelationManagers\UnitsRelationManager::class,
+        ];
     }
 
     public static function getPages(): array
