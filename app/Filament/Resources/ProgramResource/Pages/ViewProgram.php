@@ -9,6 +9,7 @@ use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\Grid;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\RepeatableEntry;
 
 class ViewProgram extends ViewRecord
 {
@@ -123,6 +124,27 @@ class ViewProgram extends ViewRecord
                     ->columns([
                         'default' => 1,
                         'md' => 2,
+                    ])
+                    ->collapsed(true),
+
+                Section::make('Peserta')
+                    ->schema([
+                        RepeatableEntry::make('participants')
+                            ->schema([
+                                TextEntry::make('name')
+                                    ->label('Nama')
+                                    ->weight('semibold'),
+                                TextEntry::make('pivot.status')
+                                    ->label('Status')
+                                    ->badge()
+                                    ->color(fn($state) => match ($state) {
+                                        'completed' => 'success',
+                                        'in_progress' => 'warning',
+                                        default => 'gray',
+                                    }),
+                            ])
+                            ->columns(2)
+                            ->columnSpanFull(),
                     ])
                     ->collapsed(true),
             ])

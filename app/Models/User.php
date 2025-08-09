@@ -70,4 +70,9 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
     {
         return true;
     }
+
+    public function programs()
+    {
+        return $this->belongsToMany(Program::class)->withPivot('status')->withTimestamps();
+    }
 }
