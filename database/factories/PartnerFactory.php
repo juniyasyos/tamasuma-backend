@@ -17,7 +17,11 @@ class PartnerFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'name' => $this->faker->company(),
+            'description' => $this->faker->sentence(),
+            'website_url' => $this->faker->url(),
+            'logo_path' => null,
+            'is_visible' => true,
         ];
     }
 }
