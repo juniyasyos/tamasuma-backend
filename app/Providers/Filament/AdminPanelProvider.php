@@ -58,7 +58,7 @@ class AdminPanelProvider extends PanelProvider
             ->when($this->settings->login_enabled ?? true, fn($panel) => $panel->login(Login::class))
             ->when($this->settings->registration_enabled ?? true, fn($panel) => $panel->registration())
             ->when($this->settings->password_reset_enabled ?? true, fn($panel) => $panel->passwordReset())
-            ->emailVerification()
+            // ->emailVerification()
             ->colors([
                 'primary' => Color::Amber,
             ])
