@@ -28,7 +28,7 @@ class ProgramResourceTable
         return $table
             ->heading('Daftar Program')
             ->description('Kelola program pembelajaran internal maupun eksternal.')
-            ->recordUrl(fn (Model $record) => static::getUrl('view', ['record' => $record]))
+            ->recordUrl(fn (Model $record) => \App\Filament\Resources\ProgramResource::getUrl('view', ['record' => $record]))
             ->columns([
                 TextColumn::make('title')
                     ->label('Judul')
