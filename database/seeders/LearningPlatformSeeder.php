@@ -9,15 +9,11 @@ use App\Models\Material;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Faker\Factory as Faker;
 
 class LearningPlatformSeeder extends Seeder
 {
-    /**
-     * Konfigurasi default (bisa disesuaikan).
-     */
     protected int $programsPerArea = 6;       // jumlah program per area
-    protected float $externalRatio = 0.4;     // peluang program eksternal (0..1)
+    protected float $externalRatio  = 0.4;    // rasio eksternal (tetap dipakai sbg kalkulasi, tapi deterministik)
     protected array $areas = [
         'Koding Dasar',
         'Komunikasi Efektif',
@@ -25,46 +21,51 @@ class LearningPlatformSeeder extends Seeder
         'Data & Analitik',
     ];
 
+    // daftar “tetap” (urutan dipakai melingkar/cyclic)
+    protected array $prefixes = ['Fundamental', 'Dasar-Dasar', 'Praktik', 'Intensif', 'Kelas', 'Workshop'];
+    protected array $suffixes = ['Untuk Pemula', 'Terapan', 'Lanjutan', 'Cepat', 'Project-Based', 'Mendalam'];
+    protected array $levels   = ['pemula', 'menengah', 'lanjutan'];
+    protected array $platforms = ['Dicoding', 'Coursera', 'Udemy', 'edX', 'BuildWithAngga'];
+    protected array $materialTypes = ['text', 'video', 'file', 'quiz'];
+
     public function run(): void
     {
-        $faker = Faker::create('id_ID');
-
-        // daftar platform eksternal yang umum
-        $platforms = ['Dicoding', 'Coursera', 'Udemy', 'edX', 'BuildWithAngga'];
-
         foreach ($this->areas as $areaName) {
-            DB::transaction(function () use ($areaName, $faker, $platforms) {
+            DB::transaction(function () use ($areaName) {
                 // ==== LEARNING AREA ====
                 $areaSlug = $this->uniqueSlug(LearningArea::class, $areaName);
                 $area = LearningArea::updateOrCreate(
                     ['slug' => $areaSlug],
                     [
-                        'name'       => $areaName,
-                        'description'=> $faker->sentence(12),
-                        'is_active'  => true,
+                        'name'        => $areaName,
+                        'description' => "Koleksi program terkurasi untuk topik {$areaName}.",
+                        'is_active'   => true,
                     ]
                 );
 
+                // hitung berapa program eksternal (deterministik)
+                $externalCount = (int) round($this->programsPerArea * $this->externalRatio);
+
                 // ==== PROGRAMS ====
                 for ($i = 1; $i <= $this->programsPerArea; $i++) {
-                    $title = $this->programTitle($areaName, $i, $faker);
+                    $title = $this->programTitle($areaName, $i);
                     $slug  = $this->uniqueSlug(Program::class, $title);
 
-                    $isExternal   = $faker->boolean($this->externalRatio * 100);
-                    $level        = $faker->randomElement(['pemula', 'menengah', 'lanjutan']);
-                    $isPublished  = $faker->boolean(75); // mayoritas published
-                    $isCertified  = $faker->boolean(55);
+                    $isExternal  = $i <= $externalCount; // program 1..externalCount = eksternal, sisanya internal
+                    $level       = $this->levels[($i - 1) % count($this->levels)];
+                    $isPublished = $i % 6 !== 0;     // contoh: semua published kecuali ke-6 (pola tetap)
+                    $isCertified = $i % 2 === 0;     // contoh: genap = tersertifikasi (pola tetap)
 
-                    $platform     = $isExternal ? $faker->randomElement($platforms) : null;
-                    $externalUrl  = $isExternal ? $faker->url() : null;
-                    $source       = $isExternal ? 'external' : 'internal';
+                    $platform    = $isExternal ? $this->platforms[($i - 1) % count($this->platforms)] : null;
+                    $externalUrl = $isExternal ? "https://example.com/{$areaSlug}/program-{$i}" : null;
+                    $source      = $isExternal ? 'external' : 'internal';
 
                     $program = Program::updateOrCreate(
                         ['slug' => $slug],
                         [
                             'learning_area_id' => $area->id,
                             'title'            => $title,
-                            'description'      => $faker->paragraphs(2, true),
+                            'description'      => "Program {$title} berfokus pada praktik terstruktur dan studi kasus.",
                             'level'            => $level,
                             'is_published'     => $isPublished,
                             'source'           => $source,
@@ -76,12 +77,11 @@ class LearningPlatformSeeder extends Seeder
 
                     // ==== INTERNAL PROGRAM CONTENT ====
                     if ($source === 'internal') {
-                        $this->seedUnitsAndMaterials($program, $faker);
+                        $this->seedUnitsAndMaterials($program);
                     }
                 }
             });
 
-            // Progress output di console (jika via artisan db:seed)
             if (isset($this->command)) {
                 $this->command->info("✓ Seeded area: {$areaName}");
             }
@@ -89,12 +89,12 @@ class LearningPlatformSeeder extends Seeder
     }
 
     /**
-     * Buat Unit & Material berurutan untuk program internal.
+     * Buat Unit & Material berurutan (deterministik).
      */
-    protected function seedUnitsAndMaterials(Program $program, \Faker\Generator $faker): void
+    protected function seedUnitsAndMaterials(Program $program): void
     {
-        // 3–5 unit per program internal
-        $unitCount = $faker->numberBetween(3, 5);
+        // Tetapkan jumlah unit & materi per unit (tanpa random)
+        $unitCount = 4;
 
         for ($j = 1; $j <= $unitCount; $j++) {
             $unitTitle = "Unit {$j} - {$program->title}";
@@ -105,29 +105,28 @@ class LearningPlatformSeeder extends Seeder
                 [
                     'program_id' => $program->id,
                     'title'      => $unitTitle,
-                    'summary'    => $faker->sentence(15),
+                    'summary'    => "Ringkasan materi untuk {$unitTitle}.",
                     'order'      => $j,
                     'is_visible' => true,
                 ]
             );
 
-            // 2–4 materi per unit
-            $materialCount = $faker->numberBetween(2, 4);
+            // 3 materi per unit (tetap)
+            $materialCount = 3;
             for ($k = 1; $k <= $materialCount; $k++) {
+                $type = $this->materialTypes[($k - 1) % count($this->materialTypes)];
                 $materialTitle = "Materi {$k} - {$unit->title}";
-                $type = $faker->randomElement(['text', 'video', 'file', 'quiz']);
 
                 $content = match ($type) {
-                    'text'  => $faker->paragraphs(3, true),
-                    'video' => 'https://www.youtube.com/watch?v=' . Str::random(11),
-                    'file'  => '/files/contoh/' . Str::slug($materialTitle) . '.pdf',
-                    'quiz'  => 'Kuis singkat dengan 5 pertanyaan pilihan ganda.',
-                    default => $faker->sentence(10),
+                    'text'  => "Konten teks terstruktur untuk {$materialTitle}.",
+                    'video' => "https://videos.example.com/{$program->slug}/unit-{$j}-materi-{$k}",
+                    'file'  => "/files/{$program->slug}/unit-{$j}/materi-{$k}.pdf",
+                    'quiz'  => "Kuis 5 soal pilihan ganda untuk {$materialTitle}.",
+                    default => "Konten {$type} untuk {$materialTitle}.",
                 };
 
                 Material::updateOrCreate(
                     [
-                        // gabungan kunci logis agar idempotent
                         'unit_id' => $unit->id,
                         'order'   => $k,
                     ],
@@ -135,8 +134,8 @@ class LearningPlatformSeeder extends Seeder
                         'title'            => $materialTitle,
                         'type'             => $type,
                         'content'          => $content,
-                        'duration_minutes' => $faker->numberBetween(5, 30),
-                        'is_mandatory'     => $faker->boolean(70),
+                        'duration_minutes' => 10 + ($k * 5), // pola 15/20/25
+                        'is_mandatory'     => $k !== 3,       // contoh: materi 1-2 wajib, 3 opsional
                         'is_visible'       => true,
                     ]
                 );
@@ -162,19 +161,12 @@ class LearningPlatformSeeder extends Seeder
     }
 
     /**
-     * Generator judul program yang lebih “manusiawi”.
+     * Generator judul program deterministik & unik per area.
      */
-    protected function programTitle(string $areaName, int $idx, \Faker\Generator $faker): string
+    protected function programTitle(string $areaName, int $idx): string
     {
-        $prefix = $faker->randomElement([
-            'Fundamental', 'Dasar-Dasar', 'Praktik', 'Intensif', 'Kelas',
-        ]);
-
-        $suffix = $faker->randomElement([
-            'Untuk Pemula', 'Terapan', 'Lanjutan', 'Cepat', 'Project-Based',
-        ]);
-
-        // Contoh: "Dasar-Dasar Koding Dasar: Project-Based"
+        $prefix = $this->prefixes[($idx - 1) % count($this->prefixes)];
+        $suffix = $this->suffixes[($idx - 1) % count($this->suffixes)];
         return "{$prefix} {$areaName}: {$suffix}";
     }
 }

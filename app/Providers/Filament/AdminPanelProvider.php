@@ -6,7 +6,6 @@ use App\Filament\Pages\Login;
 use App\Models\User;
 use App\Settings\KaidoSetting;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
-use Digitonic\FilamentNavigation\FilamentNavigation;
 use DutchCodingCompany\FilamentSocialite\FilamentSocialitePlugin;
 use DutchCodingCompany\FilamentSocialite\Provider;
 use Filament\Forms\Components\FileUpload;
@@ -119,7 +118,6 @@ class AdminPanelProvider extends PanelProvider
                 ->allowLocationSettings()
                 ->allowSiteSettings()
                 ->allowSocialMenuSettings(),
-            FilamentNavigation::make(),
             BreezyCore::make()
                 ->myProfile(
                     shouldRegisterUserMenu: false, // Sets the 'account' link in the panel User Menu (default = true)

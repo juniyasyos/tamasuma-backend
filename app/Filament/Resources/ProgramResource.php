@@ -22,11 +22,12 @@ class ProgramResource extends Resource
     protected static ?string $navigationLabel = 'Program Pembelajaran';
     protected static ?string $pluralModelLabel = 'Program';
     protected static ?string $modelLabel = 'Program Pembelajaran';
+    protected static ?int $navigationSort = 2;
 
-    public static function getNavigationBadge(): ?string
-    {
-        return (string) Program::query()->where('is_published', false)->count();
-    }
+    // public static function getNavigationBadge(): ?string
+    // {
+    //     return (string) Program::query()->where('is_published', false)->count();
+    // }
 
     public static function getNavigationBadgeTooltip(): ?string
     {

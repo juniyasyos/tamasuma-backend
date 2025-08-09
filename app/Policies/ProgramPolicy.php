@@ -105,9 +105,4 @@ class ProgramPolicy
     {
         return $user->can('reorder_program');
     }
-
-    public function enroll(User $user, Program $program): bool
-    {
-        return $user->can('enroll_program');
-    }
 }
