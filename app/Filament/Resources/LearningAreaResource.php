@@ -88,13 +88,6 @@ class LearningAreaResource extends Resource
         ];
     }
 
-    public static function getRelations(): array
-    {
-        return [
-            ProgramsRelationManager::class,
-        ];
-    }
-
     public static function getPages(): array
     {
         return [
