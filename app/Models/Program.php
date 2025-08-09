@@ -41,6 +41,11 @@ class Program extends Model
         return $this->belongsToMany(User::class)->withPivot('status')->withTimestamps();
     }
 
+    public function certificates()
+    {
+        return $this->hasMany(Certificate::class);
+    }
+
     protected static function booted(): void
     {
         static::saving(function ($model) {

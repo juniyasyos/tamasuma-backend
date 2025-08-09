@@ -31,17 +31,33 @@ class ParticipantsRelationManager extends RelationManager
         return $table
             ->columns([
                 TextColumn::make('name')->label('Nama')->searchable(),
-                TextColumn::make('pivot.status')->label('Status')->badge(),
+                TextColumn::make('email')->label('Email')->searchable(),
+                TextColumn::make('pivot.status')
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'completed' => 'success',
+                        'in_progress' => 'warning',
+                        default => 'gray',
+                    }),
                 TextColumn::make('pivot.created_at')
                     ->label('Gabung')
-                    ->dateTime()->since(),
+                    ->dateTime()
+                    ->since(),
             ])
             ->headerActions([
-                AttachAction::make()->preloadRecordSelect()->form([
-                    Forms\Components\Select::make('status')
-                        ->label('Status')
-                        ->required(),
-                ]),
+                AttachAction::make()
+                    ->recordSelect(function (Forms\Components\Select $select) {
+                        return $select
+                            ->label('User')
+                            ->searchable()
+                            ->preload();
+                    })
+                    ->form([
+                        Forms\Components\Select::make('status')
+                            ->label('Status')
+                            ->required(),
+                    ]),
             ])
             ->actions([
                 EditAction::make()->form([
