@@ -3,12 +3,20 @@
 namespace App\Filament\Resources\ProgramResource;
 
 use App\Models\Program;
+use Filament\Forms;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ReplicateAction;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
-use Filament\Tables\Columns\{TextColumn, IconColumn};
-use Filament\Tables\Filters\{Filter, TernaryFilter, SelectFilter};
-use Filament\Tables\Actions\{Action, ActionGroup, ViewAction, EditAction, ReplicateAction};
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -20,7 +28,7 @@ class ProgramResourceTable
         return $table
             ->heading('Daftar Program')
             ->description('Kelola program pembelajaran internal maupun eksternal.')
-            ->recordUrl(fn(Model $record) => static::getUrl('view', ['record' => $record]))
+            ->recordUrl(fn (Model $record) => static::getUrl('view', ['record' => $record]))
             ->columns([
                 TextColumn::make('title')
                     ->label('Judul')
@@ -41,22 +49,22 @@ class ProgramResourceTable
                     ->label('Tingkat')
                     ->badge()
                     ->sortable()
-                    ->color(fn(string $state) => match ($state) {
+                    ->color(fn (string $state) => match ($state) {
                         'pemula' => 'success',
                         'menengah' => 'warning',
                         'lanjutan' => 'danger',
-                        default   => 'gray',
+                        default => 'gray',
                     })
-                    ->formatStateUsing(fn(?string $state) => $state ? Str::title($state) : '-'),
+                    ->formatStateUsing(fn (?string $state) => $state ? Str::title($state) : '-'),
 
                 TextColumn::make('source')
                     ->label('Sumber')
                     ->badge()
                     ->sortable()
-                    ->color(fn(string $state) => match ($state) {
+                    ->color(fn (string $state) => match ($state) {
                         'internal' => 'gray',
                         'external' => 'info',
-                        default     => 'gray',
+                        default => 'gray',
                     }),
 
                 TextColumn::make('platform')
@@ -104,7 +112,7 @@ class ProgramResourceTable
                 SelectFilter::make('level')
                     ->label('Tingkat')
                     ->options([
-                        'pemula'   => 'Pemula',
+                        'pemula' => 'Pemula',
                         'menengah' => 'Menengah',
                         'lanjutan' => 'Lanjutan',
                     ]),
@@ -121,8 +129,8 @@ class ProgramResourceTable
                     ->placeholder('Semua')
                     ->trueLabel('Hanya Publik')
                     ->falseLabel('Hanya Draft')
-                    ->indicateUsing(fn($state) => match ($state) {
-                        true  => 'Publik',
+                    ->indicateUsing(fn ($state) => match ($state) {
+                        true => 'Publik',
                         false => 'Draft',
                         default => null,
                     }),
@@ -141,13 +149,18 @@ class ProgramResourceTable
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
-                            ->when($data['from'] ?? null, fn($q, $date) => $q->whereDate('created_at', '>=', $date))
-                            ->when($data['until'] ?? null, fn($q, $date) => $q->whereDate('created_at', '<=', $date));
+                            ->when($data['from'] ?? null, fn ($q, $date) => $q->whereDate('created_at', '>=', $date))
+                            ->when($data['until'] ?? null, fn ($q, $date) => $q->whereDate('created_at', '<=', $date));
                     })
                     ->indicateUsing(function (array $data): array {
                         $indicators = [];
-                        if ($data['from'] ?? null) $indicators[] = Tables\Filters\Indicator::make('Dari ' . $data['from']);
-                        if ($data['until'] ?? null) $indicators[] = Tables\Filters\Indicator::make('Sampai ' . $data['until']);
+                        if ($data['from'] ?? null) {
+                            $indicators[] = Tables\Filters\Indicator::make('Dari '.$data['from']);
+                        }
+                        if ($data['until'] ?? null) {
+                            $indicators[] = Tables\Filters\Indicator::make('Sampai '.$data['until']);
+                        }
+
                         return $indicators;
                     }),
             ])
@@ -156,7 +169,7 @@ class ProgramResourceTable
                 ViewAction::make('detail')
                     ->label('Detail')
                     ->icon('heroicon-o-eye')
-                    ->url(fn(Program $record) => static::getUrl('view', ['record' => $record]))
+                    ->url(fn (Program $record) => static::getUrl('view', ['record' => $record]))
                     ->openUrlInNewTab(false)
                     ->iconButton()
                     ->tooltip('Lihat detail'),
@@ -176,36 +189,37 @@ class ProgramResourceTable
                         ->label('Publikasikan')
                         ->icon('heroicon-o-eye')
                         ->color('success')
-                        ->visible(fn(Program $record) => !$record->is_published)
+                        ->visible(fn (Program $record) => ! $record->is_published)
                         ->requiresConfirmation()
-                        ->action(fn(Program $record) => $record->update(['is_published' => true]))
+                        ->action(fn (Program $record) => $record->update(['is_published' => true]))
                         ->successNotificationTitle('Program dipublikasikan.'),
 
                     Action::make('unpublish')
                         ->label('Jadikan Draft')
                         ->icon('heroicon-o-eye-slash')
                         ->color('gray')
-                        ->visible(fn(Program $record) => $record->is_published)
+                        ->visible(fn (Program $record) => $record->is_published)
                         ->requiresConfirmation()
-                        ->action(fn(Program $record) => $record->update(['is_published' => false]))
+                        ->action(fn (Program $record) => $record->update(['is_published' => false]))
                         ->successNotificationTitle('Program diubah menjadi draft.'),
 
                     // Buka link eksternal (hanya jika sumber eksternal & ada URL)
                     Action::make('openExternal')
                         ->label('Buka Link Program')
                         ->icon('heroicon-o-arrow-top-right-on-square')
-                        ->url(fn(Program $record) => $record->external_url ?: '#', true)
-                        ->visible(fn(Program $record) => $record->source === 'external' && filled($record->external_url)),
+                        ->url(fn (Program $record) => $record->external_url ?: '#', true)
+                        ->visible(fn (Program $record) => $record->source === 'external' && filled($record->external_url)),
 
                     // Duplikasi aman: set judul & slug baru, default jadi draft
                     ReplicateAction::make('duplicate')
                         ->label('Duplikat')
                         ->icon('heroicon-o-document-duplicate')
                         ->mutateRecordDataUsing(function (array $data, Program $record): array {
-                            $newTitle = $record->title . ' (Copy)';
+                            $newTitle = $record->title.' (Copy)';
                             $data['title'] = $newTitle;
-                            $data['slug'] = Str::slug($record->slug . '-copy-' . Str::random(4));
+                            $data['slug'] = Str::slug($record->slug.'-copy-'.Str::random(4));
                             $data['is_published'] = false;
+
                             return $data;
                         })
                         ->successNotificationTitle('Program diduplikasi (status: draft).'),
@@ -225,4 +239,3 @@ class ProgramResourceTable
             ->deferLoading();
     }
 }
-
