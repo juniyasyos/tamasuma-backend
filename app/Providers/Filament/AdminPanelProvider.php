@@ -56,9 +56,9 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('')
-            ->when($this->settings->login_enabled ?? true, fn ($panel) => $panel->login(Login::class))
-            ->when($this->settings->registration_enabled ?? true, fn ($panel) => $panel->registration())
-            ->when($this->settings->password_reset_enabled ?? true, fn ($panel) => $panel->passwordReset())
+            ->when($this->settings->login_enabled ?? true, fn($panel) => $panel->login(Login::class))
+            ->when($this->settings->registration_enabled ?? true, fn($panel) => $panel->registration())
+            ->when($this->settings->password_reset_enabled ?? true, fn($panel) => $panel->passwordReset())
             ->emailVerification()
             ->colors([
                 'primary' => Color::Amber,
@@ -115,7 +115,10 @@ class AdminPanelProvider extends PanelProvider
                 ),
             FilamentShieldPlugin::make(),
             ApiServicePlugin::make(),
-            FilamentSettingsHubPlugin::make(),
+            FilamentSettingsHubPlugin::make()
+                ->allowLocationSettings()
+                ->allowSiteSettings()
+                ->allowSocialMenuSettings(),
             FilamentNavigation::make(),
             BreezyCore::make()
                 ->myProfile(
@@ -125,10 +128,10 @@ class AdminPanelProvider extends PanelProvider
                     hasAvatars: false, // Enables the avatar upload form component (default = false)
                     slug: 'my-profile'
                 )
-                ->avatarUploadComponent(fn ($fileUpload) => $fileUpload->disableLabel())
+                ->avatarUploadComponent(fn($fileUpload) => $fileUpload->disableLabel())
                 // OR, replace with your own component
                 ->avatarUploadComponent(
-                    fn () => FileUpload::make('avatar_url')
+                    fn() => FileUpload::make('avatar_url')
                         ->image()
                         ->disk('public')
                 )
@@ -138,25 +141,25 @@ class AdminPanelProvider extends PanelProvider
         if ($this->settings->sso_enabled ?? true) {
             $plugins[] =
                 FilamentSocialitePlugin::make()
-                    ->providers([
-                        Provider::make('google')
-                            ->label('Google')
-                            ->icon('fab-google')
-                            ->color(Color::hex('#2f2a6b'))
-                            ->outlined(true)
-                            ->stateless(false),
-                    ])->registration(true)
-                    ->createUserUsing(function (string $provider, SocialiteUserContract $oauthUser, FilamentSocialitePlugin $plugin) {
-                        $user = User::firstOrNew([
-                            'email' => $oauthUser->getEmail(),
-                        ]);
-                        $user->name = $oauthUser->getName();
-                        $user->email = $oauthUser->getEmail();
-                        $user->email_verified_at = now();
-                        $user->save();
+                ->providers([
+                    Provider::make('google')
+                        ->label('Google')
+                        ->icon('fab-google')
+                        ->color(Color::hex('#2f2a6b'))
+                        ->outlined(true)
+                        ->stateless(false),
+                ])->registration(true)
+                ->createUserUsing(function (string $provider, SocialiteUserContract $oauthUser, FilamentSocialitePlugin $plugin) {
+                    $user = User::firstOrNew([
+                        'email' => $oauthUser->getEmail(),
+                    ]);
+                    $user->name = $oauthUser->getName();
+                    $user->email = $oauthUser->getEmail();
+                    $user->email_verified_at = now();
+                    $user->save();
 
-                        return $user;
-                    });
+                    return $user;
+                });
         }
 
         return $plugins;

@@ -19,7 +19,7 @@ class PartnerResourceTable
     {
         return $table
             // klik baris → halaman detail (infolist), bukan modal
-            ->recordUrl(fn (Model $record) => static::getUrl('view', ['record' => $record]))
+            ->recordUrl(fn (Model $record) => \App\Filament\Resources\PartnerResource::getUrl('view', ['record' => $record]))
             ->columns([
                 Split::make([
                     ImageColumn::make('logo_path')
