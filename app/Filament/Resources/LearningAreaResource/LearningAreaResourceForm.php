@@ -2,8 +2,13 @@
 
 namespace App\Filament\Resources\LearningAreaResource;
 
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
-use Filament\Forms\Components\{Section, TextInput, Textarea, Toggle};
+use Filament\Forms\Set;
+use Illuminate\Support\Str;
 
 class LearningAreaResourceForm
 {
@@ -16,7 +21,9 @@ class LearningAreaResourceForm
                     TextInput::make('name')
                         ->label('Nama')
                         ->required()
-                        ->maxLength(100),
+                        ->maxLength(100)
+                        ->live(onBlur: true)
+                        ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state))),
 
                     TextInput::make('slug')
                         ->helperText('URL unik bidang, seperti "pemrograman-web"')
@@ -43,4 +50,3 @@ class LearningAreaResourceForm
         ]);
     }
 }
-
