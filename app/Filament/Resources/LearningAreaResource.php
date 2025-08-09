@@ -2,13 +2,14 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\LearningAreaResource\Pages;
 use App\Filament\Resources\LearningAreaResource\LearningAreaResourceForm;
 use App\Filament\Resources\LearningAreaResource\LearningAreaResourceTable;
+use App\Filament\Resources\LearningAreaResource\Pages;
+use App\Filament\Resources\LearningAreaResource\RelationManagers\ProgramsRelationManager;
 use App\Filament\Resources\LearningAreaResource\Widgets\LearningAreaStats;
 use App\Models\LearningArea;
-use Filament\Resources\Resource;
 use Filament\Forms\Form;
+use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -17,10 +18,14 @@ class LearningAreaResource extends Resource
 {
     protected static ?string $model = LearningArea::class;
 
-    protected static ?string $navigationIcon  = 'heroicon-o-book-open';
+    protected static ?string $navigationIcon = 'heroicon-o-book-open';
+
     protected static ?string $navigationGroup = 'Content Management';
+
     protected static ?string $navigationLabel = 'Bidang Pembelajaran';
+
     protected static ?string $pluralModelLabel = 'Bidang Pembelajaran';
+
     protected static ?string $modelLabel = 'Bidang Pembelajaran';
 
     // Letakkan di urutan yang kamu mau (mis. ke-2 atau ke-3)
@@ -30,6 +35,7 @@ class LearningAreaResource extends Resource
     public static function getNavigationBadge(): ?string
     {
         $count = static::getModel()::query()->where('is_active', false)->count();
+
         return $count ? (string) $count : null;
     }
 
@@ -47,7 +53,7 @@ class LearningAreaResource extends Resource
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
-            'Slug'   => $record->slug,
+            'Slug' => $record->slug,
             'Status' => $record->is_active ? 'Aktif' : 'Nonaktif',
         ];
     }
@@ -85,18 +91,17 @@ class LearningAreaResource extends Resource
     public static function getRelations(): array
     {
         return [
-            // Contoh kalau nanti ada relasi Program:
-            // RelationManagers\ProgramsRelationManager::class,
+            ProgramsRelationManager::class,
         ];
     }
 
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListLearningAreas::route('/'),
+            'index' => Pages\ListLearningAreas::route('/'),
             'create' => Pages\CreateLearningArea::route('/create'),
-            'view'   => Pages\ViewLearningArea::route('/{record}'),
-            'edit'   => Pages\EditLearningArea::route('/{record}/edit'),
+            'view' => Pages\ViewLearningArea::route('/{record}'),
+            'edit' => Pages\EditLearningArea::route('/{record}/edit'),
         ];
     }
 }
