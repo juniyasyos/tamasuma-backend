@@ -36,6 +36,11 @@ class Program extends Model
         return $this->hasMany(Unit::class);
     }
 
+    public function participants()
+    {
+        return $this->belongsToMany(User::class)->withPivot('status')->withTimestamps();
+    }
+
     protected static function booted(): void
     {
         static::saving(function ($model) {

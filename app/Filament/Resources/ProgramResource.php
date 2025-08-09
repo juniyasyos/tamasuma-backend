@@ -28,6 +28,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Filament\Tables\Actions\{Action, ActionGroup, ViewAction, EditAction, ReplicateAction};
+use App\Filament\Resources\ProgramResource\RelationManagers\ParticipantsRelationManager;
 
 class ProgramResource extends Resource
 {
@@ -424,7 +425,9 @@ class ProgramResource extends Resource
 
     public static function getRelations(): array
     {
-        return [];
+        return [
+            ParticipantsRelationManager::class,
+        ];
     }
 
     public static function getPages(): array
