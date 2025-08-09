@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
                 ContactSeeder::class,
                 LearningPlatformSeeder::class,
                 PartnerSeeder::class,
+                ProgramEnrollmentSeeder::class,
             ]
         );
     }

@@ -20,6 +20,7 @@ use Filament\Support\Colors\Color;
 use Filament\Widgets;
 use Hasnayeen\Themes\Http\Middleware\SetTheme;
 use Hasnayeen\Themes\ThemesPlugin;
+use Juniyasyos\FilamentSettingsHub\FilamentSettingsHubPlugin;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -114,6 +115,7 @@ class AdminPanelProvider extends PanelProvider
                 ),
             FilamentShieldPlugin::make(),
             ApiServicePlugin::make(),
+            FilamentSettingsHubPlugin::make(),
             FilamentNavigation::make(),
             BreezyCore::make()
                 ->myProfile(
