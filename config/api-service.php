@@ -4,9 +4,10 @@ return [
     'navigation' => [
         'token' => [
             'cluster' => null,
-            'group' => 'User',
-            'sort' => -1,
+            'group' => 'Settings',
+            'sort' => 2,
             'icon' => 'heroicon-o-key',
+            'should_register_navigation' => true,
         ],
     ],
     'models' => [
@@ -22,4 +23,15 @@ return [
         'enabled' => false,
         'awareness' => false,
     ],
+    'login-rules' => [
+        'email' => 'required|email',
+        'password' => 'required',
+    ],
+    'login-middleware' => [
+
+    ],
+    'logout-middleware' => [
+        'auth:sanctum',
+    ],
+    'use-spatie-permission-middleware' => true,
 ];
