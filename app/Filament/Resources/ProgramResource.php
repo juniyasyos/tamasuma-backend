@@ -39,15 +39,15 @@ class ProgramResource extends Resource
     protected static ?string $pluralModelLabel = 'Program';
     protected static ?string $modelLabel = 'Program Pembelajaran';
 
-    public static function getNavigationBadge(): ?string
-    {
-        return (string) Program::query()->where('is_published', false)->count();
-    }
+    // public static function getNavigationBadge(): ?string
+    // {
+    //     return (string) Program::query()->where('is_published', false)->count();
+    // }
 
-    public static function getNavigationBadgeTooltip(): ?string
-    {
-        return 'Jumlah program berstatus Draft';
-    }
+    // public static function getNavigationBadgeTooltip(): ?string
+    // {
+    //     return 'Jumlah program berstatus Draft';
+    // }
 
     public static function getGloballySearchableAttributes(): array
     {
@@ -170,6 +170,8 @@ class ProgramResource extends Resource
                                             'internal' => 'heroicon-o-building-library',
                                             'external' => 'heroicon-o-globe-alt',
                                         ])
+                                        ->default('external')
+                                        ->disabled()
                                         ->inline()
                                         ->required()
                                         ->live(),
