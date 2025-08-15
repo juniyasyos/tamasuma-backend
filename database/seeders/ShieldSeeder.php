@@ -12,21 +12,115 @@ class ShieldSeeder extends Seeder
     {
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $rolesWithPermissions = '[{"name":"super_admin","guard_name":"web","permissions":["view_book","view_any_book","create_book","update_book","restore_book","restore_any_book","replicate_book","reorder_book","delete_book","delete_any_book","force_delete_book","force_delete_any_book","book:create_book","book:update_book","book:delete_book","book:pagination_book","book:detail_book","view_role","view_any_role","create_role","update_role","delete_role","delete_any_role","view_token","view_any_token","create_token","update_token","restore_token","restore_any_token","replicate_token","reorder_token","delete_token","delete_any_token","force_delete_token","force_delete_any_token","view_user","view_any_user","create_user","update_user","restore_user","restore_any_user","replicate_user","reorder_user","delete_user","delete_any_user","force_delete_user","force_delete_any_user","page_ManageSetting","page_MyProfilePage"]},{"name":"Moderator","guard_name":"web","permissions":["view_book","view_any_book","create_book","update_book","restore_book","restore_any_book","replicate_book","reorder_book","delete_book","delete_any_book","force_delete_book","force_delete_any_book","book:create_book","book:update_book","book:delete_book","book:pagination_book","book:detail_book","page_ManageSetting","page_MyProfilePage"]}]';
-        $directPermissions = '{"12":{"name":"export_book","guard_name":"web"},"18":{"name":"view_contact","guard_name":"web"},"19":{"name":"view_any_contact","guard_name":"web"},"20":{"name":"create_contact","guard_name":"web"},"21":{"name":"update_contact","guard_name":"web"},"22":{"name":"restore_contact","guard_name":"web"},"23":{"name":"restore_any_contact","guard_name":"web"},"24":{"name":"replicate_contact","guard_name":"web"},"25":{"name":"reorder_contact","guard_name":"web"},"26":{"name":"delete_contact","guard_name":"web"},"27":{"name":"delete_any_contact","guard_name":"web"},"28":{"name":"force_delete_contact","guard_name":"web"},"29":{"name":"force_delete_any_contact","guard_name":"web"},"30":{"name":"view_post","guard_name":"web"},"31":{"name":"view_any_post","guard_name":"web"},"32":{"name":"create_post","guard_name":"web"},"33":{"name":"update_post","guard_name":"web"},"34":{"name":"restore_post","guard_name":"web"},"35":{"name":"restore_any_post","guard_name":"web"},"36":{"name":"replicate_post","guard_name":"web"},"37":{"name":"reorder_post","guard_name":"web"},"38":{"name":"delete_post","guard_name":"web"},"39":{"name":"delete_any_post","guard_name":"web"},"40":{"name":"force_delete_post","guard_name":"web"},"41":{"name":"force_delete_any_post","guard_name":"web"},"42":{"name":"post:create_post","guard_name":"web"},"43":{"name":"post:update_post","guard_name":"web"},"44":{"name":"post:delete_post","guard_name":"web"},"45":{"name":"post:pagination_post","guard_name":"web"},"46":{"name":"post:detail_post","guard_name":"web"}}';
+        // HANYA entity yang sesuai dengan policy yang ada
+        $entities = [
+            'role',
+            'token',
+            'user',
+            'program',
+            'unit',
+            'material',
+            'partner',
+            'learning_area',
+        ];
+
+        // Generator daftar permission standar untuk satu entity
+        $allActions = [
+            'view',
+            'view_any',
+            'create',
+            'update',
+            'restore',
+            'restore_any',
+            'replicate',
+            'reorder',
+            'delete',
+            'delete_any',
+            'force_delete',
+            'force_delete_any',
+        ];
+
+        $makePerms = function (string $entity, array $actions) {
+            return array_map(
+                fn($a) => ($a === 'view_any' || $a === 'restore_any' || $a === 'delete_any' || $a === 'force_delete_any')
+                    ? "{$a}_{$entity}"
+                    : "{$a}_{$entity}",
+                $actions
+            );
+        };
+
+        // Kumpulan permission lengkap per entity
+        $permsByEntity = [];
+        foreach ($entities as $e) {
+            $permsByEntity[$e] = $makePerms($e, $allActions);
+        }
+
+        // Shortcut kelompok entity konten (akses pelajar/moderator/admin)
+        $contentEntities = ['program', 'unit', 'material', 'partner', 'learning_area'];
+
+        // Role: super_admin (semua)
+        $superAdminPerms = array_values(array_unique(array_merge(...array_values($permsByEntity))));
+
+        // Role: admin (full pada konten + user + token) — tidak mengelola role
+        $adminEntities = array_merge($contentEntities, ['user', 'token']);
+        $adminPerms = [];
+        foreach ($adminEntities as $e) {
+            $adminPerms = array_merge($adminPerms, $permsByEntity[$e]);
+        }
+        $adminPerms = array_values(array_unique($adminPerms));
+
+        // Role: Moderator (read + update saja pada konten)
+        $moderatorPerms = [];
+        $moderatorAllowed = ['view', 'view_any', 'update', 'replicate', 'reorder', 'restore', 'restore_any'];
+        foreach ($contentEntities as $e) {
+            $moderatorPerms = array_merge($moderatorPerms, $makePerms($e, $moderatorAllowed));
+        }
+        $moderatorPerms = array_values(array_unique($moderatorPerms));
+
+        // Role: pelajar (read-only pada konten)
+        $pelajarPerms = [];
+        $pelajarAllowed = ['view', 'view_any'];
+        foreach ($contentEntities as $e) {
+            $pelajarPerms = array_merge($pelajarPerms, $makePerms($e, $pelajarAllowed));
+        }
+        $pelajarPerms = array_values(array_unique($pelajarPerms));
+
+        $rolesWithPermissions = json_encode([
+            [
+                'name' => 'super_admin',
+                'guard_name' => 'web',
+                'permissions' => $superAdminPerms,
+            ],
+            [
+                'name' => 'Pengajar',
+                'guard_name' => 'web',
+                'permissions' => $moderatorPerms,
+            ],
+            [
+                'name' => 'Admin',
+                'guard_name' => 'web',
+                'permissions' => $adminPerms,
+            ],
+            [
+                'name' => 'Pelajar',
+                'guard_name' => 'web',
+                'permissions' => $pelajarPerms,
+            ],
+        ]);
+
+        // Tidak ada directPermissions lain di luar policy — kosongkan
+        $directPermissions = '[]';
 
         static::makeRolesWithPermissions($rolesWithPermissions);
         static::makeDirectPermissions($directPermissions);
 
-        $this->command->info('Shield Seeding Completed.');
+        $this->command->info('Shield Seeding Completed (policy-only).');
     }
 
     protected static function makeRolesWithPermissions(string $rolesWithPermissions): void
     {
         if (! blank($rolePlusPermissions = json_decode($rolesWithPermissions, true))) {
-            /** @var Model $roleModel */
             $roleModel = Utils::getRoleModel();
-            /** @var Model $permissionModel */
             $permissionModel = Utils::getPermissionModel();
 
             foreach ($rolePlusPermissions as $rolePlusPermission) {
@@ -52,7 +146,6 @@ class ShieldSeeder extends Seeder
     public static function makeDirectPermissions(string $directPermissions): void
     {
         if (! blank($permissions = json_decode($directPermissions, true))) {
-            /** @var Model $permissionModel */
             $permissionModel = Utils::getPermissionModel();
 
             foreach ($permissions as $permission) {
