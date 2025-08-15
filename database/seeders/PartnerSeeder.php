@@ -2,8 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Partner;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class PartnerSeeder extends Seeder
 {
@@ -12,6 +13,19 @@ class PartnerSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        $partnerNames = ['ASF', 'ASDFG', 'PKBM'];
+
+        foreach ($partnerNames as $name) {
+            Partner::updateOrCreate(
+                ['slug' => Str::slug($name)],
+                [
+                    'name' => $name,
+                    'description' => null,
+                    'website_url' => null,
+                    'logo_path' => null,
+                    'is_visible' => true,
+                ]
+            );
+        }
     }
 }
