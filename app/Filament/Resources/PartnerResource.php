@@ -57,6 +57,25 @@ class PartnerResource extends Resource
                         ->maxLength(255),
                 ])->columns(2),
 
+            Section::make('Kontak & Lokasi')
+                ->description('Informasi alamat dan kontak partner.')
+                ->schema([
+                    Textarea::make('address')
+                        ->label('Alamat')
+                        ->rows(2)
+                        ->columnSpanFull(),
+
+                    TextInput::make('contact_email')
+                        ->label('Email Kontak')
+                        ->email()
+                        ->maxLength(100),
+
+                    TextInput::make('contact_phone')
+                        ->label('Telepon Kontak')
+                        ->tel()
+                        ->maxLength(30),
+                ])->columns(2),
+
             Section::make('Pengaturan')
                 ->collapsible()
                 ->schema([
@@ -80,6 +99,14 @@ class PartnerResource extends Resource
                     ->label('Website')
                     ->url(fn($record) => $record->website_url)
                     ->openUrlInNewTab()
+                    ->toggleable(),
+
+                TextColumn::make('contact_email')
+                    ->label('Email')
+                    ->toggleable(),
+
+                TextColumn::make('contact_phone')
+                    ->label('Telepon')
                     ->toggleable(),
 
                 IconColumn::make('is_visible')
