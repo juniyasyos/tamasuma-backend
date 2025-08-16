@@ -20,6 +20,9 @@ class Partner extends Model
         'description',
         'website_url',
         'logo_path',
+        'address',
+        'contact_email',
+        'contact_phone',
         'is_visible',
     ];
 

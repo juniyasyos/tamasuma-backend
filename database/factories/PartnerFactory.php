@@ -25,6 +25,9 @@ class PartnerFactory extends Factory
             'description' => $this->faker->sentence(),
             'website_url' => $this->faker->url(),
             'logo_path' => null,
+            'address' => $this->faker->address(),
+            'contact_email' => $this->faker->unique()->safeEmail(),
+            'contact_phone' => $this->faker->phoneNumber(),
             'is_visible' => true,
         ];
     }

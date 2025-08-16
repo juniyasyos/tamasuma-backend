@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
                 PostSeeder::class,
                 ContactSeeder::class,
                 LearningPlatformSeeder::class,
+                PartnerSeeder::class,
                 ShieldSeeder::class,
             ]
         );
