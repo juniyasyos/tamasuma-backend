@@ -18,6 +18,7 @@ A powerful and opinionated FilamentPHP starter kit designed to accelerate your a
 - ⚡ Quick CRUD generation with customized [FilamentPHP](https://filamentphp.com/) stubs
     - Optimized UX out of the box
     - No need to modify generated resources
+- 🧩 Structured resource components with dedicated `Schema` and `Table` classes for complex forms and tables
 - 🔄 Auto reload on save for rapid development
 - 📚 Easy API documentation using [Scramble](https://scramble.dedoc.co/)
 - 📤 Built-in Export and Import examples in Filament resources
