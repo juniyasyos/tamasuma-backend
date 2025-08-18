@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\UserResource;
 
+use App\Filament\Resources\UserResource;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Components\Grid;
@@ -12,7 +13,7 @@ use Filament\Forms\Components\Toggle;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
-class Schema
+class Schema extends UserResource
 {
     /**
      * Get the form schema for the User resource.

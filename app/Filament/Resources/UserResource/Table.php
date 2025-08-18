@@ -4,6 +4,7 @@ namespace App\Filament\Resources\UserResource;
 
 use App\Filament\Exports\UserExporter;
 use App\Filament\Imports\UserImporter;
+use App\Filament\Resources\UserResource;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
@@ -29,7 +30,7 @@ use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table as FilamentTable;
 use Illuminate\Database\Eloquent\Builder;
 
-class Table
+class Table extends UserResource
 {
     /**
      * Configure the table for the User resource.
