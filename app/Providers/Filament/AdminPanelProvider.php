@@ -113,6 +113,10 @@ class AdminPanelProvider extends PanelProvider
                     ],
                     override: true,
                 ),
+            \Juniyasyos\FilamentSettingsHub\FilamentSettingsHubPlugin::make()
+                ->allowLocationSettings()
+                ->allowSiteSettings()
+                ->allowSocialMenuSettings(),
             FilamentShieldPlugin::make(),
             ApiServicePlugin::make(),
             BreezyCore::make()
