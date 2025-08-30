@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Config;
 use BezhanSalleh\FilamentShield\Support\Utils;
 use Spatie\Permission\PermissionRegistrar;
 
@@ -93,29 +94,43 @@ class ShieldSeeder extends Seeder
             'view_widget_media_storage_chart',
         ];
 
+        // Dashboard audience permissions (used by StatOverview detection)
+        $dashboardAudiencePerms = (array) Config::get('dashboard.permissions', [
+            'super_admin' => 'dashboard.view.super_admin',
+            'admin' => 'dashboard.view.admin',
+            'pengajar' => 'dashboard.view.pengajar',
+            'pelajar' => 'dashboard.view.pelajar',
+        ]);
+
         $rolesWithPermissions = json_encode([
             [
                 'name' => 'super_admin',
                 'guard_name' => 'web',
-                'permissions' => array_values(array_unique(array_merge($superAdminPerms, $widgetPerms))),
+                'permissions' => array_values(array_unique(array_merge($superAdminPerms, $widgetPerms, [
+                    $dashboardAudiencePerms['super_admin'],
+                ]))),
             ],
             [
                 'name' => 'Pengajar',
                 'guard_name' => 'web',
                 'permissions' => array_values(array_unique(array_merge($moderatorPerms, [
                     'view_widget_stat_overview',
+                    $dashboardAudiencePerms['pengajar'],
                 ]))),
             ],
             [
                 'name' => 'Admin',
                 'guard_name' => 'web',
-                'permissions' => array_values(array_unique(array_merge($adminPerms, $widgetPerms))),
+                'permissions' => array_values(array_unique(array_merge($adminPerms, $widgetPerms, [
+                    $dashboardAudiencePerms['admin'],
+                ]))),
             ],
             [
                 'name' => 'Pelajar',
                 'guard_name' => 'web',
                 'permissions' => array_values(array_unique(array_merge($pelajarPerms, [
                     'view_widget_stat_overview',
+                    $dashboardAudiencePerms['pelajar'],
                 ]))),
             ],
         ]);
