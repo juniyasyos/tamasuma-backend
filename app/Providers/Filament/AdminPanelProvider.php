@@ -17,6 +17,7 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Widgets;
+use Leandrocfe\FilamentApexCharts\FilamentApexChartsPlugin;
 use Hasnayeen\Themes\Http\Middleware\SetTheme;
 use Hasnayeen\Themes\ThemesPlugin;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -119,6 +120,7 @@ class AdminPanelProvider extends PanelProvider
                 ->allowSocialMenuSettings(),
             FilamentShieldPlugin::make(),
             ApiServicePlugin::make(),
+            FilamentApexChartsPlugin::make(),
             BreezyCore::make()
                 ->myProfile(
                     shouldRegisterUserMenu: false, // Sets the 'account' link in the panel User Menu (default = true)
