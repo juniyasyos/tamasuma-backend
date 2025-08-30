@@ -14,7 +14,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Unique;
 
 class Schema extends UserResource
 {
@@ -39,7 +39,7 @@ class Schema extends UserResource
                                 TextInput::make('email')
                                     ->email()
                                     ->required()
-                                    ->unique(modifyRuleUsing: fn(Rule $rule, ?User $record) => $rule->ignore($record))
+                                    ->unique(modifyRuleUsing: fn(Unique $rule, ?User $record) => $rule->ignore($record))
                                     ->helperText('Gunakan email aktif.'),
                             ]),
 
