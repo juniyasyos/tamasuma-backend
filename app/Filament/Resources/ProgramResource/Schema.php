@@ -13,6 +13,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\ToggleButtons;
+use Filament\Forms\Components\DatePicker;
 
 class Schema extends ProgramResource
 {
@@ -185,6 +186,7 @@ class Schema extends ProgramResource
                                     Forms\Components\Select::make('status')
                                         ->label('Status')
                                         ->options([
+                                            'requested' => 'Menunggu Persetujuan',
                                             'active' => 'Aktif',
                                             'completed' => 'Selesai',
                                             'dropped' => 'Berhenti',
@@ -213,4 +215,17 @@ class Schema extends ProgramResource
         ];
     }
 }
+                                        DatePicker::make('starts_at')
+                                            ->label('Mulai')
+                                            ->native(false)
+                                            ->closeOnDateSelection()
+                                            ->suffixIcon('heroicon-o-calendar')
+                                            ->helperText('Tanggal mulai program (opsional).'),
 
+                                        DatePicker::make('ends_at')
+                                            ->label('Selesai')
+                                            ->native(false)
+                                            ->closeOnDateSelection()
+                                            ->suffixIcon('heroicon-o-calendar')
+                                            ->rule('after_or_equal:starts_at')
+                                            ->helperText('Batas akhir pelaksanaan program (opsional).'),

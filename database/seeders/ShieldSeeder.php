@@ -147,6 +147,7 @@ class ShieldSeeder extends Seeder
                 'permissions' => array_values(array_unique(array_merge($pelajarPerms, [
                     'view_widget_stat_overview',
                     $dashboardAudiencePerms['pelajar'],
+                    'request_enrollment',
                 ]))),
             ],
         ]);

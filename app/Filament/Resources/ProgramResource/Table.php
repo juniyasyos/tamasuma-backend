@@ -17,6 +17,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Filament\Notifications\Notification;
+use App\Models\Enrollment;
 
     class Table extends ProgramResource
     {
@@ -114,6 +116,18 @@ use Illuminate\Support\Str;
                     ->dateTime('d M Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('starts_at')
+                    ->label('Mulai')
+                    ->date('d M Y')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('ends_at')
+                    ->label('Selesai')
+                    ->date('d M Y')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: false),
             ])
             ->defaultSort('created_at', 'desc')
             ->groups([
@@ -185,6 +199,49 @@ use Illuminate\Support\Str;
                     ->openUrlInNewTab(false)
                     ->iconButton()
                     ->tooltip('Lihat detail'),
+
+                Action::make('apply')
+                    ->label('Ajukan Ikut')
+                    ->icon('heroicon-o-user-plus')
+                    ->color('primary')
+                    ->authorize(fn() => (bool) (Auth::user()?->can('request_enrollment')))
+                    ->visible(fn(Program $record) => $record->is_published && (! $record->ends_at || $record->ends_at->isFuture()))
+                    ->requiresConfirmation()
+                    ->action(function (Program $record) {
+                        $user = Auth::user();
+                        if (! $user) {
+                            Notification::make()->title('Silakan masuk dulu.')->danger()->send();
+                            return;
+                        }
+                        if ($record->ends_at && $record->ends_at->isPast()) {
+                            Notification::make()->title('Program sudah selesai.')->warning()->send();
+                            return;
+                        }
+                        $existing = Enrollment::where('user_id', $user->id)->where('program_id', $record->id)->first();
+                        if ($existing) {
+                            $msg = match ($existing->status) {
+                                'requested' => 'Permohonan sudah diajukan. Menunggu persetujuan.',
+                                'active' => 'Anda sudah terdaftar pada program ini.',
+                                'completed' => 'Anda sudah menyelesaikan program ini.',
+                                default => 'Enrolmen sudah ada.',
+                            };
+                            Notification::make()->title($msg)->info()->send();
+                            return;
+                        }
+
+                        Enrollment::create([
+                            'user_id' => $user->id,
+                            'program_id' => $record->id,
+                            'status' => 'requested',
+                            'requested_at' => now(),
+                        ]);
+
+                        Notification::make()
+                            ->title('Permohonan dikirim')
+                            ->body('Permohonan mengikuti program telah dikirim. Menunggu persetujuan admin.')
+                            ->success()
+                            ->send();
+                    }),
 
                 EditAction::make('edit')
                     ->label('Edit')

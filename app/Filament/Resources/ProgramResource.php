@@ -88,7 +88,9 @@ class ProgramResource extends Resource
 
     public static function getRelations(): array
     {
-        return [];
+        return [
+            \App\Filament\Resources\ProgramResource\RelationManagers\EnrollmentsRelationManager::class,
+        ];
     }
 
     public static function getPages(): array

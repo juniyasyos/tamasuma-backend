@@ -24,6 +24,13 @@ class Program extends Model
         'platform',
         'external_url',
         'is_certified',
+        'starts_at',
+        'ends_at',
+    ];
+
+    protected $casts = [
+        'starts_at' => 'date',
+        'ends_at' => 'date',
     ];
 
     public function learningArea()
@@ -65,5 +72,10 @@ class Program extends Model
     public function isInternal(): bool
     {
         return $this->source === 'internal';
+    }
+
+    public function isFinished(): bool
+    {
+        return ! is_null($this->ends_at) && $this->ends_at->isPast();
     }
 }

@@ -23,7 +23,13 @@ class ProgramPolicy
      */
     public function view(User $user, Program $program): bool
     {
-        return $user->can('view_program');
+        // Allow viewing published programs if user has base view permission
+        if ($program->is_published) {
+            return $user->can('view_program');
+        }
+
+        // For unpublished: allow admins or editors with explicit permission, or owners who can update
+        return $user->can('view_unpublished_program') || $this->update($user, $program);
     }
 
     /**
