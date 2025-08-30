@@ -11,6 +11,8 @@ use Filament\Infolists\Components\Grid as InfoGrid;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\Section as InfolistSection;
+use Filament\Infolists\Components\Tabs as InfoTabs;
+use Filament\Infolists\Components\Tabs\Tab as InfoTab;
 use Filament\Infolists\Components\ViewEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
@@ -59,46 +61,48 @@ class UserResource extends Resource
     public static function infolist(Infolist $infolist): Infolist
     {
         return $infolist->schema([
-            InfolistSection::make('Profil')
-                ->schema([
-                    InfoGrid::make(['default' => 1, 'md' => 2, 'xl' => 3])->schema([
-                        ImageEntry::make('avatar_url')
-                            ->label('Avatar')
-                            ->circular()
-                            ->getStateUsing(fn (User $r) => $r->avatar_url ?: 'https://ui-avatars.com/api/?name='.urlencode($r->name))
-                            ->columnSpan(1),
+            InfoTabs::make('UserViewTabs')
+                ->columnSpanFull()
+                ->tabs([
+                    InfoTab::make('Profil')
+                        ->icon('heroicon-o-user')
+                        ->schema([
+                            InfoGrid::make(['default' => 1, 'md' => 2, 'xl' => 3])->schema([
+                                ImageEntry::make('avatar_url')
+                                    ->label('Avatar')
+                                    ->circular()
+                                    ->getStateUsing(fn(User $r) => $r->avatar_url ?: 'https://ui-avatars.com/api/?name=' . urlencode($r->name))
+                                    ->columnSpan(1),
 
-                        TextEntry::make('name')->label('Nama')->weight('semibold')->size('lg'),
-                        TextEntry::make('email')->icon('heroicon-m-envelope')->copyable(),
-                        IconEntry::make('email_verified_at')
-                            ->label('Verifikasi Email')
-                            ->boolean()
-                            ->trueIcon('heroicon-m-check-circle')
-                            ->falseIcon('heroicon-m-x-circle')
-                            ->trueColor('success')
-                            ->falseColor('gray'),
-                        TextEntry::make('created_at')->label('Dibuat')->since()->icon('heroicon-m-calendar'),
-                        TextEntry::make('updated_at')->label('Diubah')->since()->icon('heroicon-m-arrow-path'),
-                    ]),
+                                TextEntry::make('name')->label('Nama')->weight('semibold')->size('lg'),
+                                TextEntry::make('email')->icon('heroicon-m-envelope')->copyable(),
+                                IconEntry::make('email_verified_at')
+                                    ->label('Verifikasi Email')
+                                    ->boolean()
+                                    ->trueIcon('heroicon-m-check-circle')
+                                    ->falseIcon('heroicon-m-x-circle')
+                                    ->trueColor('success')
+                                    ->falseColor('gray'),
+                                TextEntry::make('created_at')->label('Dibuat')->since()->icon('heroicon-m-calendar'),
+                                TextEntry::make('updated_at')->label('Diubah')->since()->icon('heroicon-m-arrow-path'),
+                            ]),
 
-                    TextEntry::make('roles.name')
-                        ->label('Roles')
-                        ->badge()
-                        ->color('info')
-                        ->separator(' '),
-                ])
-                ->columns(1)
-                ->collapsed(false),
+                            TextEntry::make('roles.name')
+                                ->label('Roles')
+                                ->badge()
+                                ->color('info')
+                                ->separator(' '),
+                        ]),
 
-            InfolistSection::make('Pencapaian')
-                ->schema([
-                    ViewEntry::make('achievements')
-                        ->label(false)
-                        ->view('filament/users/achievements-inline')
-                        ->getStateUsing(fn (User $r) => $r->achievements()->orderByDesc('achieved_at')->get()),
-                ])
-                ->columns(1)
-                ->collapsed(false),
+                    InfoTab::make('Pencapaian')
+                        ->icon('heroicon-o-star')
+                        ->schema([
+                            ViewEntry::make('achievements')
+                                ->label(false)
+                                ->view('filament/users/achievements-inline')
+                                ->getStateUsing(fn(User $r) => $r->achievements()->orderByDesc('achieved_at')->get()),
+                        ]),
+                ]),
         ]);
     }
 }
