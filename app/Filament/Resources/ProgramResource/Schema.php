@@ -98,8 +98,6 @@ class Schema extends ProgramResource
                                             ->suffixIcon('heroicon-o-calendar')
                                             ->rule('after_or_equal:starts_at')
                                             ->helperText('Batas akhir pelaksanaan program (opsional).')
-                                            ->maxLength(100)
-                                            ->helperText('Terbentuk otomatis dari judul.'),
                                     ]),
 
                                     Textarea::make('description')

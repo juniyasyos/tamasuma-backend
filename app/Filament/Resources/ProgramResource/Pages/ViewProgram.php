@@ -26,7 +26,15 @@ class ViewProgram extends ViewRecord
                 ->icon('heroicon-o-user-plus')
                 ->color('primary')
                 ->authorize(fn() => (bool) (Auth::user()?->can('request_enrollment')))
-                ->visible(fn($record) => $record->is_published && (! $record->ends_at || $record->ends_at->isFuture()))
+                ->visible(function ($record) {
+                    $userId = Auth::id();
+                    if (! $userId) return false;
+                    $notEnded = (! $record->ends_at || $record->ends_at->isFuture());
+                    if (! $record->is_published || ! $notEnded) return false;
+                    return ! \App\Models\Enrollment::where('user_id', $userId)
+                        ->where('program_id', $record->id)
+                        ->exists();
+                })
                 ->action(function () {
                     $user = Auth::user();
                     $record = $this->getRecord();
@@ -68,120 +76,5 @@ class ViewProgram extends ViewRecord
         ];
     }
 
-    public function infolist(Infolist $infolist): Infolist
-    {
-        return $infolist
-            ->schema([
-                Section::make('Ringkasan')
-                    ->description('Detail singkat program pembelajaran.')
-                    ->schema([
-                        Grid::make()
-                            ->schema([
-                                TextEntry::make('title')
-                                    ->label('Judul')
-                                    ->weight('semibold')
-                                    ->size('lg')
-                                    ->columnSpanFull(),
-
-                                TextEntry::make('learningArea.name')
-                                    ->label('Bidang')
-                                    ->badge()
-                                    ->color('gray'),
-
-                                TextEntry::make('level')
-                                    ->label('Tingkat')
-                                    ->badge()
-                                    ->color(fn($state) => match ($state) {
-                                        'pemula' => 'success',
-                                        'menengah' => 'warning',
-                                        'lanjutan' => 'danger',
-                                        default => 'gray',
-                                    })
-                                    ->formatStateUsing(fn($state) => ucfirst($state ?? '-')),
-
-                        TextEntry::make('slug')
-                            ->label('Slug')
-                            ->copyable()
-                            ->icon('heroicon-m-link'),
-
-                        TextEntry::make('starts_at')
-                            ->label('Mulai')
-                            ->date('d M Y')
-                            ->placeholder('-'),
-
-                        TextEntry::make('ends_at')
-                            ->label('Selesai')
-                            ->date('d M Y')
-                            ->placeholder('-'),
-
-                        IconEntry::make('is_published')
-                            ->label('Status')
-                            ->boolean()
-                                    ->trueIcon('heroicon-m-check-circle')
-                                    ->falseIcon('heroicon-m-x-circle')
-                                    ->trueColor('success')
-                                    ->falseColor('gray'),
-
-                                IconEntry::make('is_certified')
-                                    ->label('Sertifikat')
-                                    ->boolean()
-                                    ->trueIcon('heroicon-m-check-badge')
-                                    ->falseIcon('heroicon-m-x-mark')
-                                    ->trueColor('success')
-                                    ->falseColor('gray'),
-
-                                TextEntry::make('created_at')
-                                    ->label('Dibuat')
-                                    ->since()
-                                    ->icon('heroicon-m-calendar'),
-
-                                TextEntry::make('updated_at')
-                                    ->label('Diubah')
-                                    ->since()
-                                    ->icon('heroicon-m-arrow-path'),
-                            ])
-                            ->columns([
-                                'default' => 1,
-                                'md' => 2,
-                                'xl' => 3,
-                            ]),
-                    ])
-                    ->collapsible(),
-
-                Section::make('Deskripsi')
-                    ->schema([
-                        TextEntry::make('description')
-                            ->placeholder('Belum ada deskripsi.')
-                            ->prose() 
-                            ->columnSpanFull(),
-                    ])
-                    ->collapsed(false),
-
-                Section::make('Sumber Program')
-                    ->schema([
-                        TextEntry::make('source')
-                            ->label('Sumber')
-                            ->badge()
-                            ->color(fn($state) => $state === 'external' ? 'info' : 'gray')
-                            ->formatStateUsing(fn($state) => ucfirst($state ?? '-')),
-
-                        TextEntry::make('platform')
-                            ->label('Platform')
-                            ->placeholder('-'),
-
-                        TextEntry::make('external_url')
-                            ->label('Link Program')
-                            ->url(fn($state) => $state ?: null, shouldOpenInNewTab: true)
-                            ->icon('heroicon-m-arrow-top-right-on-square')
-                            ->placeholder('-')
-                            ->visible(fn($record) => $record->source === 'external'),
-                    ])
-                    ->columns([
-                        'default' => 1,
-                        'md' => 2,
-                    ])
-                    ->collapsed(true),
-            ])
-            ->columns(1);
-    }
+    // Remove custom infolist to use ProgramResource::infolist (which uses tabs)
 }

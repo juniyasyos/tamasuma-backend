@@ -205,7 +205,16 @@ use App\Models\Enrollment;
                     ->icon('heroicon-o-user-plus')
                     ->color('primary')
                     ->authorize(fn() => (bool) (Auth::user()?->can('request_enrollment')))
-                    ->visible(fn(Program $record) => $record->is_published && (! $record->ends_at || $record->ends_at->isFuture()))
+                    ->visible(function (Program $record) {
+                        $userId = Auth::id();
+                        if (! $userId) return false;
+                        // Only when published, not ended, and not already requested/enrolled
+                        $notEnded = (! $record->ends_at || $record->ends_at->isFuture());
+                        if (! $record->is_published || ! $notEnded) return false;
+                        return ! \App\Models\Enrollment::where('user_id', $userId)
+                            ->where('program_id', $record->id)
+                            ->exists();
+                    })
                     ->requiresConfirmation()
                     ->action(function (Program $record) {
                         $user = Auth::user();

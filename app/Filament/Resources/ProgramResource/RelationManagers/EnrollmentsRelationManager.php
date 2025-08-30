@@ -8,8 +8,6 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 
@@ -24,15 +22,15 @@ class EnrollmentsRelationManager extends RelationManager
             ->description('Kelola permohonan dan status keikutsertaan program.')
             ->columns([
                 TextColumn::make('user.name')->label('Pengguna')->searchable()->wrap(),
-                BadgeColumn::make('status')
+                TextColumn::make('status')
+                    ->badge()
                     ->label('Status')
                     ->colors([
                         'warning' => 'requested',
                         'success' => 'active',
                         'primary' => 'completed',
                         'gray' => 'dropped',
-                    ])
-                    ->formatStateUsing(fn(string $s) => ucfirst($s)),
+                    ]),
                 TextColumn::make('requested_at')->label('Diminta')->since()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('approved_at')->label('Disetujui')->since()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('rejected_at')->label('Ditolak')->since()->toggleable(isToggledHiddenByDefault: true),
@@ -84,4 +82,3 @@ class EnrollmentsRelationManager extends RelationManager
             ]);
     }
 }
-
