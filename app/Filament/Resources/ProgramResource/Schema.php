@@ -97,7 +97,7 @@ class Schema extends ProgramResource
                                             ->closeOnDateSelection()
                                             ->suffixIcon('heroicon-o-calendar')
                                             ->rule('after_or_equal:starts_at')
-                                            ->helperText('Batas akhir pelaksanaan program (opsional).'),
+                                            ->helperText('Batas akhir pelaksanaan program (opsional).')
                                             ->maxLength(100)
                                             ->helperText('Terbentuk otomatis dari judul.'),
                                     ]),
@@ -227,7 +227,7 @@ class Schema extends ProgramResource
                                 ->grid(1)
                                 ->helperText('Kelola pengguna yang terdaftar pada program ini.'),
                         ]),
-                ]),
+                ])
         ];
     }
 }
