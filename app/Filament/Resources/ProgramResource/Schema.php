@@ -78,10 +78,26 @@ class Schema extends ProgramResource
                                             })
                                             ->helperText('Gunakan judul singkat & jelas (maks. 100 karakter).'),
 
-                                        TextInput::make('slug')
+                                    TextInput::make('slug')
                                             ->label('Slug URL')
                                             ->readOnly()
                                             ->unique(ignoreRecord: true)
+                                            ,
+
+                                        DatePicker::make('starts_at')
+                                            ->label('Mulai')
+                                            ->native(false)
+                                            ->closeOnDateSelection()
+                                            ->suffixIcon('heroicon-o-calendar')
+                                            ->helperText('Tanggal mulai program (opsional).'),
+
+                                        DatePicker::make('ends_at')
+                                            ->label('Selesai')
+                                            ->native(false)
+                                            ->closeOnDateSelection()
+                                            ->suffixIcon('heroicon-o-calendar')
+                                            ->rule('after_or_equal:starts_at')
+                                            ->helperText('Batas akhir pelaksanaan program (opsional).'),
                                             ->maxLength(100)
                                             ->helperText('Terbentuk otomatis dari judul.'),
                                     ]),
@@ -215,17 +231,3 @@ class Schema extends ProgramResource
         ];
     }
 }
-                                        DatePicker::make('starts_at')
-                                            ->label('Mulai')
-                                            ->native(false)
-                                            ->closeOnDateSelection()
-                                            ->suffixIcon('heroicon-o-calendar')
-                                            ->helperText('Tanggal mulai program (opsional).'),
-
-                                        DatePicker::make('ends_at')
-                                            ->label('Selesai')
-                                            ->native(false)
-                                            ->closeOnDateSelection()
-                                            ->suffixIcon('heroicon-o-calendar')
-                                            ->rule('after_or_equal:starts_at')
-                                            ->helperText('Batas akhir pelaksanaan program (opsional).'),
