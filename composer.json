@@ -86,7 +86,7 @@
             "@php artisan shield:generate --all --panel=admin",
             "@php artisan shield:super-admin --user=1",
             "git clean -f && git reset --hard"
-        ],
+        ]
     },
     "extra": {
         "laravel": {
