@@ -36,6 +36,18 @@ class Program extends Model
         return $this->hasMany(Unit::class);
     }
 
+    public function enrollments()
+    {
+        return $this->hasMany(\App\Models\Enrollment::class);
+    }
+
+    public function users()
+    {
+        return $this->belongsToMany(\App\Models\User::class, 'enrollments')
+            ->withPivot(['status', 'enrolled_at', 'completed_at', 'notes'])
+            ->withTimestamps();
+    }
+
     protected static function booted(): void
     {
         static::saving(function ($model) {

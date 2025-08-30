@@ -157,6 +157,54 @@ class Schema extends UserResource
                                 ->collapsed(false)
                                 ->helperText('Tambahkan pencapaian secara manual, termasuk gambar bukti.'),
                         ]),
+
+                    Tab::make('Program')
+                        ->icon('heroicon-o-rectangle-stack')
+                        ->schema([
+                            Forms\Components\Repeater::make('enrollments')
+                                ->relationship('enrollments')
+                                ->label('Enrolmen Program')
+                                ->addActionLabel('Tambah Enrolmen')
+                                ->defaultItems(0)
+                                ->columns(2)
+                                ->schema([
+                                    Forms\Components\Select::make('program_id')
+                                        ->label('Program')
+                                        ->relationship('program', 'title')
+                                        ->searchable()
+                                        ->preload()
+                                        ->required()
+                                        ->native(false)
+                                        ->disableOptionsWhenSelectedInSiblingRepeaterItems()
+                                        ->helperText('Setiap program hanya boleh satu kali per user.'),
+
+                                    Forms\Components\Select::make('status')
+                                        ->label('Status')
+                                        ->options([
+                                            'active' => 'Aktif',
+                                            'completed' => 'Selesai',
+                                            'dropped' => 'Berhenti',
+                                        ])
+                                        ->required()
+                                        ->native(false),
+
+                                    Forms\Components\DatePicker::make('enrolled_at')
+                                        ->label('Tanggal Daftar')
+                                        ->native(false),
+
+                                    Forms\Components\DatePicker::make('completed_at')
+                                        ->label('Tanggal Selesai')
+                                        ->native(false),
+
+                                    Forms\Components\Textarea::make('notes')
+                                        ->label('Catatan')
+                                        ->rows(2)
+                                        ->columnSpanFull(),
+                                ])
+                                ->reorderable(false)
+                                ->grid(1)
+                                ->helperText('Catat pendaftaran user ke program, termasuk status dan tanggal.'),
+                        ]),
                 ]),
         ];
     }

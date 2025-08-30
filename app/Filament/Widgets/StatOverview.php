@@ -13,6 +13,11 @@ use Illuminate\Support\Facades\DB;
 
 class StatOverview extends BaseWidget
 {
+    public static function canView(): bool
+    {
+        $u = Auth::user();
+        return $u?->can('view_widget_stat_overview') ?? false;
+    }
     protected int|string|array $columnSpan = ['sm' => 2, 'md' => 2, 'lg' => 3, 'xl' => 4];
     protected static ?string $pollingInterval = '60s';
 

@@ -75,4 +75,16 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
     {
         return $this->hasMany(\App\Models\Achievement::class);
     }
+
+    public function enrollments()
+    {
+        return $this->hasMany(\App\Models\Enrollment::class);
+    }
+
+    public function programs()
+    {
+        return $this->belongsToMany(\App\Models\Program::class, 'enrollments')
+            ->withPivot(['status', 'enrolled_at', 'completed_at', 'notes'])
+            ->withTimestamps();
+    }
 }

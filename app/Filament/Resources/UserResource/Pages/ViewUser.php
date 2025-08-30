@@ -3,7 +3,9 @@
 namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Resources\UserResource;
+use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
+use STS\FilamentImpersonate\Pages\Actions\Impersonate;
 
 class ViewUser extends ViewRecord
 {
@@ -14,5 +16,18 @@ class ViewUser extends ViewRecord
     public function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\Action::make('edit')
+                ->label('Edit User')
+                ->icon('heroicon-o-pencil-square')
+                ->url(fn() => UserResource::getUrl('edit', ['record' => $this->record]))
+                ->color('primary'),
+
+            Impersonate::make()->record($this->getRecord()),
+        ];
     }
 }

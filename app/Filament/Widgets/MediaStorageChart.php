@@ -4,12 +4,18 @@ namespace App\Filament\Widgets;
 
 use Illuminate\Support\Facades\DB;
 use Leandrocfe\FilamentApexCharts\Widgets\ApexChartWidget;
+use Illuminate\Support\Facades\Auth;
 
 class MediaStorageChart extends ApexChartWidget
 {
     protected static ?string $chartId = 'mediaStorageChart';
     protected static ?string $heading = '☁️ Penggunaan Media Storage';
     protected static ?int $sort = 20;
+
+    public static function canView(): bool
+    {
+        return Auth::user()?->can('view_widget_media_storage_chart') ?? false;
+    }
 
     /** full width di dashboard */
     public function getColumnSpan(): int|string|array

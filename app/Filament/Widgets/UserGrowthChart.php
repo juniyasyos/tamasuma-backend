@@ -5,11 +5,17 @@ namespace App\Filament\Widgets;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Leandrocfe\FilamentApexCharts\Widgets\ApexChartWidget;
+use Illuminate\Support\Facades\Auth;
 
 class UserGrowthChart extends ApexChartWidget
 {
     protected static ?string $chartId = 'userGrowthChart';
     protected static ?string $heading = '📈 Pertumbuhan User (14 Hari)';
+
+    public static function canView(): bool
+    {
+        return Auth::user()?->can('view_widget_user_growth_chart') ?? false;
+    }
 
     protected function getOptions(): array
     {

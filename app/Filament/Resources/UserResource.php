@@ -102,6 +102,15 @@ class UserResource extends Resource
                                 ->view('filament/users/achievements-inline')
                                 ->getStateUsing(fn(User $r) => $r->achievements()->orderByDesc('achieved_at')->get()),
                         ]),
+
+                    InfoTab::make('Program')
+                        ->icon('heroicon-o-rectangle-stack')
+                        ->schema([
+                            ViewEntry::make('enrollments')
+                                ->label(false)
+                                ->view('filament/users/enrollments-inline')
+                                ->getStateUsing(fn(User $r) => $r->enrollments()->with('program.learningArea')->latest('enrolled_at')->get()),
+                        ]),
                 ]),
         ]);
     }

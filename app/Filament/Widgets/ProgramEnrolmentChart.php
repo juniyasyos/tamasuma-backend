@@ -5,12 +5,18 @@ namespace App\Filament\Widgets;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Leandrocfe\FilamentApexCharts\Widgets\ApexChartWidget;
+use Illuminate\Support\Facades\Auth;
 
 class ProgramEnrolmentChart extends ApexChartWidget
 {
     protected static ?string $chartId = 'programEnrolmentChart';
     protected static ?string $heading = '🎓 Program Baru per Minggu';
     protected static ?int $sort = 10;
+
+    public static function canView(): bool
+    {
+        return Auth::user()?->can('view_widget_program_enrolment_chart') ?? false;
+    }
 
     protected function getOptions(): array
     {

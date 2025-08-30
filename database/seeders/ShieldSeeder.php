@@ -85,26 +85,38 @@ class ShieldSeeder extends Seeder
         }
         $pelajarPerms = array_values(array_unique($pelajarPerms));
 
+        // Widget permissions
+        $widgetPerms = [
+            'view_widget_stat_overview',
+            'view_widget_user_growth_chart',
+            'view_widget_program_enrolment_chart',
+            'view_widget_media_storage_chart',
+        ];
+
         $rolesWithPermissions = json_encode([
             [
                 'name' => 'super_admin',
                 'guard_name' => 'web',
-                'permissions' => $superAdminPerms,
+                'permissions' => array_values(array_unique(array_merge($superAdminPerms, $widgetPerms))),
             ],
             [
                 'name' => 'Pengajar',
                 'guard_name' => 'web',
-                'permissions' => $moderatorPerms,
+                'permissions' => array_values(array_unique(array_merge($moderatorPerms, [
+                    'view_widget_stat_overview',
+                ]))),
             ],
             [
                 'name' => 'Admin',
                 'guard_name' => 'web',
-                'permissions' => $adminPerms,
+                'permissions' => array_values(array_unique(array_merge($adminPerms, $widgetPerms))),
             ],
             [
                 'name' => 'Pelajar',
                 'guard_name' => 'web',
-                'permissions' => $pelajarPerms,
+                'permissions' => array_values(array_unique(array_merge($pelajarPerms, [
+                    'view_widget_stat_overview',
+                ]))),
             ],
         ]);
 
