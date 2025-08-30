@@ -56,7 +56,7 @@ class ShieldSeeder extends Seeder
             $permsByEntity[$e] = $makePerms($e, $allActions);
         }
 
-        // Shortcut kelompok entity konten (akses pelajar/moderator/admin)
+        // Kelompok entity konten
         $contentEntities = ['program', 'unit', 'material', 'partner', 'learning_area'];
 
         // Role: super_admin (semua)
@@ -68,15 +68,17 @@ class ShieldSeeder extends Seeder
         foreach ($adminEntities as $e) {
             $adminPerms = array_merge($adminPerms, $permsByEntity[$e]);
         }
-        $adminPerms = array_values(array_unique($adminPerms));
+        // Optional hardening: hilangkan force_delete untuk admin
+        $adminPerms = array_values(array_unique(array_filter($adminPerms, fn($p) => ! str_contains($p, 'force_delete'))));
 
-        // Role: Moderator (read + update saja pada konten)
-        $moderatorPerms = [];
-        $moderatorAllowed = ['view', 'view_any', 'update', 'replicate', 'reorder', 'restore', 'restore_any'];
-        foreach ($contentEntities as $e) {
-            $moderatorPerms = array_merge($moderatorPerms, $makePerms($e, $moderatorAllowed));
+        // Role: Pengajar (read + update konten pembelajaran; tanpa restore/delete)
+        $pengajarPerms = [];
+        $pengajarAllowedEntities = ['program', 'unit', 'material'];
+        $pengajarAllowed = ['view', 'view_any', 'create', 'update', 'replicate', 'reorder'];
+        foreach ($pengajarAllowedEntities as $e) {
+            $pengajarPerms = array_merge($pengajarPerms, $makePerms($e, $pengajarAllowed));
         }
-        $moderatorPerms = array_values(array_unique($moderatorPerms));
+        $pengajarPerms = array_values(array_unique($pengajarPerms));
 
         // Role: pelajar (read-only pada konten)
         $pelajarPerms = [];
@@ -94,6 +96,14 @@ class ShieldSeeder extends Seeder
             'view_widget_media_storage_chart',
         ];
 
+        // Custom permissions
+        $customPerms = [
+            'update_any_program',
+            'view_unpublished_program',
+            'publish_program',
+            'unpublish_program',
+        ];
+
         // Dashboard audience permissions (used by StatOverview detection)
         $dashboardAudiencePerms = (array) Config::get('dashboard.permissions', [
             'super_admin' => 'dashboard.view.super_admin',
@@ -106,16 +116,18 @@ class ShieldSeeder extends Seeder
             [
                 'name' => 'super_admin',
                 'guard_name' => 'web',
-                'permissions' => array_values(array_unique(array_merge($superAdminPerms, $widgetPerms, [
+                'permissions' => array_values(array_unique(array_merge($superAdminPerms, $widgetPerms, $customPerms, [
                     $dashboardAudiencePerms['super_admin'],
                 ]))),
             ],
             [
                 'name' => 'Pengajar',
                 'guard_name' => 'web',
-                'permissions' => array_values(array_unique(array_merge($moderatorPerms, [
+                'permissions' => array_values(array_unique(array_merge($pengajarPerms, [
                     'view_widget_stat_overview',
                     $dashboardAudiencePerms['pengajar'],
+                    // Pengajar dapat melihat draft (untuk editing), tapi bukan publish
+                    'view_unpublished_program',
                 ]))),
             ],
             [
@@ -123,6 +135,10 @@ class ShieldSeeder extends Seeder
                 'guard_name' => 'web',
                 'permissions' => array_values(array_unique(array_merge($adminPerms, $widgetPerms, [
                     $dashboardAudiencePerms['admin'],
+                    'update_any_program',
+                    'view_unpublished_program',
+                    'publish_program',
+                    'unpublish_program',
                 ]))),
             ],
             [

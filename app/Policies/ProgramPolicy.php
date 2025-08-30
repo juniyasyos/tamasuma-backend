@@ -39,7 +39,7 @@ class ProgramPolicy
      */
     public function update(User $user, Program $program): bool
     {
-        return $user->can('update_program');
+        return $user->can('update_any_program') || $user->can('update_program');
     }
 
     /**

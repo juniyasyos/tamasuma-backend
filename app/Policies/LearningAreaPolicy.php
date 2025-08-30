@@ -15,7 +15,7 @@ class LearningAreaPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_learning::area');
+        return $user->can('view_any_learning_area');
     }
 
     /**
@@ -23,7 +23,7 @@ class LearningAreaPolicy
      */
     public function view(User $user, LearningArea $learningArea): bool
     {
-        return $user->can('view_learning::area');
+        return $user->can('view_learning_area');
     }
 
     /**
@@ -31,7 +31,7 @@ class LearningAreaPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create_learning::area');
+        return $user->can('create_learning_area');
     }
 
     /**
@@ -39,7 +39,7 @@ class LearningAreaPolicy
      */
     public function update(User $user, LearningArea $learningArea): bool
     {
-        return $user->can('update_learning::area');
+        return $user->can('update_learning_area');
     }
 
     /**
@@ -47,7 +47,7 @@ class LearningAreaPolicy
      */
     public function delete(User $user, LearningArea $learningArea): bool
     {
-        return $user->can('delete_learning::area');
+        return $user->can('delete_learning_area');
     }
 
     /**
@@ -55,7 +55,7 @@ class LearningAreaPolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_learning::area');
+        return $user->can('delete_any_learning_area');
     }
 
     /**
@@ -63,7 +63,7 @@ class LearningAreaPolicy
      */
     public function forceDelete(User $user, LearningArea $learningArea): bool
     {
-        return $user->can('force_delete_learning::area');
+        return $user->can('force_delete_learning_area');
     }
 
     /**
@@ -71,7 +71,7 @@ class LearningAreaPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_learning::area');
+        return $user->can('force_delete_any_learning_area');
     }
 
     /**
@@ -79,7 +79,7 @@ class LearningAreaPolicy
      */
     public function restore(User $user, LearningArea $learningArea): bool
     {
-        return $user->can('restore_learning::area');
+        return $user->can('restore_learning_area');
     }
 
     /**
@@ -87,7 +87,7 @@ class LearningAreaPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_learning::area');
+        return $user->can('restore_any_learning_area');
     }
 
     /**
@@ -95,7 +95,7 @@ class LearningAreaPolicy
      */
     public function replicate(User $user, LearningArea $learningArea): bool
     {
-        return $user->can('replicate_learning::area');
+        return $user->can('replicate_learning_area');
     }
 
     /**
@@ -103,6 +103,6 @@ class LearningAreaPolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->can('reorder_learning::area');
+        return $user->can('reorder_learning_area');
     }
 }

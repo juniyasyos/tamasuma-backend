@@ -15,13 +15,27 @@ use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table as FilamentTable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
-class Table extends ProgramResource
-{
-    public static function make(FilamentTable $table): FilamentTable
+    class Table extends ProgramResource
     {
+        public static function make(FilamentTable $table): FilamentTable
+        {
+        // Common authorization closures for cleaner reuse
+        $canUpdate = fn(Program $record): bool => (bool) (Auth::user()?->can('update', $record));
+        $canReplicate = fn(Program $record): bool => (bool) (Auth::user()?->can('replicate', $record));
+        $canPublish = fn(Program $record): bool => (bool) (Auth::user()?->can('publish_program'));
+        $canUnpublish = fn(Program $record): bool => (bool) (Auth::user()?->can('unpublish_program'));
+
         return $table
+            ->modifyQueryUsing(function (Builder $query): Builder {
+                $user = Auth::user();
+                if (! $user || ! $user->can('view_unpublished_program')) {
+                    $query->where('is_published', true);
+                }
+                return $query;
+            })
             ->heading('Daftar Program')
             ->description('Kelola program pembelajaran internal maupun eksternal.')
             ->recordUrl(fn(Model $record) => ProgramResource::getUrl('view', ['record' => $record]))
@@ -176,6 +190,7 @@ class Table extends ProgramResource
                     ->label('Edit')
                     ->icon('heroicon-o-pencil-square')
                     ->slideOver()
+                    ->authorize($canUpdate)
                     ->iconButton()
                     ->tooltip('Edit'),
 
@@ -185,6 +200,7 @@ class Table extends ProgramResource
                         ->icon('heroicon-o-eye')
                         ->color('success')
                         ->visible(fn(Program $record) => !$record->is_published)
+                        ->authorize($canPublish)
                         ->requiresConfirmation()
                         ->action(fn(Program $record) => $record->update(['is_published' => true]))
                         ->successNotificationTitle('Program dipublikasikan.'),
@@ -194,6 +210,7 @@ class Table extends ProgramResource
                         ->icon('heroicon-o-eye-slash')
                         ->color('gray')
                         ->visible(fn(Program $record) => $record->is_published)
+                        ->authorize($canUnpublish)
                         ->requiresConfirmation()
                         ->action(fn(Program $record) => $record->update(['is_published' => false]))
                         ->successNotificationTitle('Program diubah menjadi draft.'),
@@ -207,6 +224,7 @@ class Table extends ProgramResource
                     ReplicateAction::make('duplicate')
                         ->label('Duplikat')
                         ->icon('heroicon-o-document-duplicate')
+                        ->authorize($canReplicate)
                         ->mutateRecordDataUsing(function (array $data, Program $record): array {
                             $newTitle = $record->title . ' (Copy)';
                             $data['title'] = $newTitle;
@@ -216,6 +234,14 @@ class Table extends ProgramResource
                         })
                         ->successNotificationTitle('Program diduplikasi (status: draft).'),
                 ])
+                    ->visible(function (Program $record) use ($canUpdate, $canReplicate, $canPublish, $canUnpublish): bool {
+                        // Show group only if any action inside is visible/authorized
+                        return $canUpdate($record)
+                            || $canPublish($record)
+                            || $canUnpublish($record)
+                            || ($record->source === 'external' && filled($record->external_url))
+                            || $canReplicate($record);
+                    })
                     ->label('Lainnya')
                     ->icon('heroicon-m-ellipsis-horizontal')
                     ->button()
