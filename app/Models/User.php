@@ -70,4 +70,9 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
     {
         return true;
     }
+
+    public function achievements()
+    {
+        return $this->hasMany(\App\Models\Achievement::class);
+    }
 }

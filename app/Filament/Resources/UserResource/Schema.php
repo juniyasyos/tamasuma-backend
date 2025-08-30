@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\UserResource;
 
 use App\Filament\Resources\UserResource;
+use App\Models\Achievement;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Components\Grid;
@@ -82,6 +83,76 @@ class Schema extends UserResource
                         ->label('Aktifkan 2FA')
                         ->helperText('Centang jika ingin memaksa 2FA (opsional, sesuaikan dengan model Anda).')
                         ->dehydrated(fn () => false), // contoh placeholder jika belum ada kolomnya
+                ]),
+
+            Section::make('Pencapaian')
+                ->description('Portofolio pencapaian yang dimiliki user ini (sertifikat, penghargaan, dsb).')
+                ->collapsible()
+                ->schema([
+                    Forms\Components\Repeater::make('achievements')
+                        ->relationship('achievements')
+                        ->label('Daftar Pencapaian')
+                        ->addActionLabel('Tambah Pencapaian')
+                        ->orderable('achieved_at')
+                        ->defaultItems(0)
+                        ->columns(2)
+                        ->schema([
+                            Forms\Components\TextInput::make('title')
+                                ->label('Judul')
+                                ->placeholder('Contoh: Sertifikat Data Science')
+                                ->required()
+                                ->maxLength(150),
+
+                            Forms\Components\Select::make('category')
+                                ->label('Kategori')
+                                ->options([
+                                    'certificate' => 'Sertifikat',
+                                    'award' => 'Penghargaan',
+                                    'competition' => 'Kompetisi',
+                                    'training' => 'Pelatihan',
+                                    'other' => 'Lainnya',
+                                ])
+                                ->native(false)
+                                ->required(),
+
+                            Forms\Components\TextInput::make('issuer')
+                                ->label('Penyelenggara/Pemberi')
+                                ->maxLength(150),
+
+                            Forms\Components\DatePicker::make('achieved_at')
+                                ->label('Tanggal')
+                                ->displayFormat('d M Y')
+                                ->native(false),
+
+                            Forms\Components\TextInput::make('url')
+                                ->label('URL terkait')
+                                ->url()
+                                ->maxLength(255)
+                                ->columnSpanFull(),
+
+                            Forms\Components\FileUpload::make('proof_image')
+                                ->label('Bukti (Gambar)')
+                                ->image()
+                                ->directory('achievements')
+                                ->disk('public')
+                                ->imageEditor()
+                                ->downloadable()
+                                ->openable()
+                                ->columnSpanFull(),
+
+                            Forms\Components\Textarea::make('description')
+                                ->label('Deskripsi')
+                                ->rows(3)
+                                ->columnSpanFull(),
+
+                            Forms\Components\Toggle::make('is_featured')
+                                ->label('Tampilkan menonjol')
+                                ->inline(false),
+                        ])
+                        ->reorderable(true)
+                        ->grid(1)
+                        ->collapsed(false)
+                        ->helperText('Tambahkan pencapaian secara manual, termasuk gambar bukti.'),
                 ]),
         ];
     }

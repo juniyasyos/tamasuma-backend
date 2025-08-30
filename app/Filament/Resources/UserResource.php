@@ -11,6 +11,7 @@ use Filament\Infolists\Components\Grid as InfoGrid;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\Section as InfolistSection;
+use Filament\Infolists\Components\ViewEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
@@ -85,6 +86,16 @@ class UserResource extends Resource
                         ->badge()
                         ->color('info')
                         ->separator(' '),
+                ])
+                ->columns(1)
+                ->collapsed(false),
+
+            InfolistSection::make('Pencapaian')
+                ->schema([
+                    ViewEntry::make('achievements')
+                        ->label(false)
+                        ->view('filament/users/achievements-inline')
+                        ->getStateUsing(fn (User $r) => $r->achievements()->orderByDesc('achieved_at')->get()),
                 ])
                 ->columns(1)
                 ->collapsed(false),
