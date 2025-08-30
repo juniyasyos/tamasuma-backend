@@ -28,12 +28,11 @@ class Infolist extends ProgramResource
                                     InfoGrid::make(['default' => 1, 'md' => 2])->schema([
                                         TextEntry::make('title')->label('Judul')->weight('semibold'),
                                         TextEntry::make('learningArea.name')->label('Bidang')->badge()->color('gray'),
-                                        TextEntry::make('level')->label('Tingkat')->badge()->color(fn($s) => match ($s) {
-                                            'pemula' => 'success',
-                                            'menengah' => 'warning',
-                                            'lanjutan' => 'danger',
-                                            default => 'gray'
-                                        }),
+                                        // TextEntry::make('level')->label('Tingkat')->badge()->color([
+                                        //     'pemula' => 'success',
+                                        //     'menengah' => 'warning',
+                                        //     'lanjutan' => 'danger'
+                                        // ]),
                                         InfoIconEntry::make('is_published')->label('Publikasi')->boolean()->trueColor('success')->falseColor('gray'),
                                         InfoIconEntry::make('is_certified')->label('Sertifikat')->boolean()->trueColor('success')->falseColor('gray'),
                                     ]),
@@ -43,7 +42,7 @@ class Infolist extends ProgramResource
                             InfoSection::make('Sumber')
                                 ->schema([
                                     InfoGrid::make(2)->schema([
-                                        TextEntry::make('source')->label('Sumber')->badge()->color(fn($s) => $s === 'external' ? 'info' : 'gray'),
+                                        // TextEntry::make('source')->label('Sumber')->badge()->color(fn($s) => $s === 'external' ? 'info' : 'gray'),
                                         TextEntry::make('platform')->label('Platform')->placeholder('-'),
                                         TextEntry::make('external_url')->label('Link')->url(true)->columnSpanFull(),
                                     ]),
