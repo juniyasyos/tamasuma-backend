@@ -1,261 +1,164 @@
-# 🚀 Kaido Kit FilamentPhp Starter Code
+# 🚀 TAMASUMA Backend — Admin Data & API Penelitian Vokasi
 
-A powerful and opinionated FilamentPHP starter kit designed to accelerate your admin panel development. Kaido Kit provides a robust foundation with pre-configured plugins, configuration and best practices for building feature-rich admin interfaces.
+Selamat datang di **TAMASUMA Backend**!  
+Proyek ini adalah tulang punggung data untuk penelitian dosen di lingkungan **Sekolah Vokasi Universitas Jember**.  
 
-![GitHub stars](https://img.shields.io/github/stars/siubie/kaido-kit?style=flat-square)
-![GitHub forks](https://img.shields.io/github/forks/siubie/kaido-kit?style=flat-square)
-![GitHub issues](https://img.shields.io/github/issues/siubie/kaido-kit?style=flat-square)
-![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)
-![PHP Version](https://img.shields.io/badge/PHP-8.2-blue?style=flat-square&logo=php)
-![Laravel Version](https://img.shields.io/badge/Laravel-11.0-red?style=flat-square&logo=laravel)
-![Filament Version](https://img.shields.io/badge/Filament-3.2-purple?style=flat-square)
-## Introduction Video
-[![Build FilamentPhp Apps 10x Faster | Kaido-Kit Starter Kit (Complete Demo)](https://img.youtube.com/vi/t6q1zBqaBGU/maxresdefault.jpg)](http://www.youtube.com/watch?v=t6q1zBqaBGU "Build FilamentPhp Apps 10x Faster | Kaido-Kit Starter Kit (Complete Demo)")
-## ✨ Features
+Bayangkan sebuah pusat komando di mana semua domain pembelajaran, program, unit, mitra, hingga pengguna dapat dikelola dengan rapi. Dari situlah data penelitian diproses, disusun, hingga siap dipublikasikan ke aplikasi atau situs publik melalui **API yang konsisten, aman, dan mudah diintegrasikan**.
 
-### 🛠️ Developer Experience
+---
 
-- ⚡ Quick CRUD generation with customized [FilamentPHP](https://filamentphp.com/) stubs
-    - Optimized UX out of the box
-    - No need to modify generated resources
-- 🧩 Structured resource components with dedicated `Schema` and `Table` classes for complex forms and tables
-- 🔄 Auto reload on save for rapid development
-- 📚 Easy API documentation using [Scramble](https://scramble.dedoc.co/)
-- 📤 Built-in Export and Import examples in Filament resources
+## 🎯 Visi Proyek
 
-### 🔐 Authentication & Authorization
+- Menyediakan **panel admin yang nyaman** untuk kurasi & pengelolaan konten pembelajaran.  
+- Menjadi **sumber data terstandar** untuk riset, publikasi, dan kebutuhan audit.  
+- Menghubungkan dosen, asisten peneliti, dan admin dalam satu alur kerja yang **efisien dan transparan**.  
 
-- 🛡️ Role-Based Access Control (RBAC) using [Filament Shield](https://filamentphp.com/plugins/bezhansalleh-shield)
-- 🔑 Enhanced login page with custom design
-- 🌐 Social login with Google via [Filament Socialite](https://filamentphp.com/plugins/dododedodonl-socialite)
-- 👤 User profile management with [Filament Breezy](https://filamentphp.com/plugins/jeffgreco-breezy)
-- 🔒 Instant 2-Factor Authentication capabilities
-- 👥 Simple user-to-role assignment
-- 🎭 User impersonation via [Filament Impersonate](https://filamentphp.com/plugins/joseph-szobody-impersonate)
+---
 
-### 📡 API & Integration
+## 📚 Apa yang Bisa Dilakukan Aplikasi Ini?
 
-- 🚀 Full API support with [Filament API Service](https://filamentphp.com/plugins/rupadana-api-service)
-    - Seamlessly integrated with Shield
-    - Ready-to-use API endpoints
-- 📨 Email integration using [Resend](https://resend.com/)
-- 📝 Auto-generated API documentation
+- 🗂 **Back-office lengkap**: Kelola Learning Area, Program, Unit, Material, Mitra, hingga pengguna dan perannya.  
+- ✅ **Kurasi program**: Pilih mana yang dipublikasikan, tandai bersertifikat, atau hubungkan dengan sumber eksternal.  
+- 🔐 **Sumber kebenaran**: Sediakan API *read-only* yang konsisten untuk pihak lain tanpa mengorbankan keamanan.  
 
-### 📁 Media & Content Management
+---
 
-- 🖼️ Integrated [Filament Media Library](https://filamentphp.com/plugins/filament-spatie-media-library)
-    - Easy media handling process
-    - [Spatie Media Library](https://spatie.be/docs/laravel-medialibrary) support
+## 🧩 Model Domain Inti
 
-### ⚙️ Configuration & Settings
+- **Learning Area** → payung dari beberapa Program.  
+- **Program** → berisi Unit (materi), punya opsi sertifikat, publikasi, periode aktif, dan tautan eksternal.  
+- **Enrollment** → catatan interaksi User–Program (status, progres, tanggal penting).  
+- **Mitra** → organisasi yang bekerja sama dengan program/kegiatan.  
+- ✨ *Tambahan teknis*: Slug otomatis + field audit → API lebih hemat payload & tetap rapi.  
 
-- 🎛️ Dynamic plugin management via [Filament Settings](https://filamentphp.com/plugins/filament-spatie-settings)
-    - Enable/disable features on the fly
-    - [Spatie Laravel Settings](https://github.com/spatie/laravel-settings) integration
+---
 
-## 🚀 Quick Start
+## ⚙️ Stack Teknologi
 
-1. Create new project using composer
+Proyek ini dibangun dengan teknologi modern namun **sengaja dibuat sederhana dan terukur**:
 
-    ```php
-    composer create-project siubie/kaido-kit
-    ```
+- **Laravel 12 + PHP 8.2** → stabil, kaya fitur (queue, cache, scheduler, policy), minim dependensi.  
+- **Filament v3** → panel admin CRUD cepat, konsisten, dan kaya plugin (RBAC, ekspor, profil).  
+- **Filament Shield (RBAC)** → izin granular, generator otomatis untuk resource baru.  
+- **Sanctum** → token & API aman, cocok untuk SPA.  
+- **Socialite (Google SSO)** + 2FA → onboarding mudah, aman, minim reset password.  
+- **Spatie Media Library** → manajemen file/media yang teruji.  
+- **Dedoc Scramble** → dokumentasi API otomatis & selalu mutakhir.  
+- **ApexCharts & Excel Export** → data & analitik instan untuk laporan riset.  
+- **Docker (Sail)** → environment dev yang konsisten.  
 
-2. Composer install
+---
 
-    ```php
-    composer install
-    ```
+## 🏛️ Prinsip Desain
 
-3. Npm Install
+- 🔒 API publik = **read-only** → menjaga integritas data riset.  
+- 🛡️ Kebijakan akses = sama di **admin panel & API**.  
+- 🧘 **Keep it simple**: monolit Laravel → menghindari kompleksitas mikroservis yang tidak perlu.  
 
-    ```php
-    npm install
-    ```
+---
 
-4. Copy .env
+## 🔐 Peran & Izin (RBAC)
 
-    ```php
-    cp .env.example .env
-    ```
+Skema peran menerapkan prinsip least‑privilege. Nama permission mengikuti pola `aksi_entitas` (misal: `view_any_program`, `update_unit`). Sumber definisi awal ada di `database/seeders/ShieldSeeder.php:1`.
 
-5. Configure your database in .env
+- Super Admin
+  - Ruang lingkup: semua entitas (`role`, `token`, `user`, `program`, `unit`, `material`, `partner`, `learning_area`).
+  - Aksi: seluruh aksi standar (view, view_any, create, update, restore, restore_any, replicate, reorder, delete, delete_any, force_delete, force_delete_any).
+  - Tambahan: izin widget (statistik/grafik), akses dashboard super admin, dan izin khusus seperti `publish_program`, `unpublish_program`, `update_any_program`, `view_unpublished_program`.
+  - Catatan: dapat mengelola role (lihat `app/Policies/RolePolicy.php:10`).
 
-    ```php
-    DB_CONNECTION=mysql
-    DB_HOST=127.0.0.1
-    DB_PORT=3306
-    DB_DATABASE=kaido_kit
-    DB_USERNAME=root
-    DB_PASSWORD=
-    ```
+- Admin
+  - Ruang lingkup: seluruh entitas konten (`program`, `unit`, `material`, `partner`, `learning_area`) + manajemen `user` dan `token`.
+  - Aksi: hampir semua aksi standar, KECUALI varian `force_delete*` (dinonaktifkan sebagai hardening).
+  - Tambahan: `update_any_program`, `view_unpublished_program`, `publish_program`, `unpublish_program`, izin widget, akses dashboard admin.
+  - Batasan: tidak mengelola `role`.
 
-6. Configure your google sign in cliend id and secret (optional)
+- Pengajar
+  - Ruang lingkup: `program`, `unit`, `material`.
+  - Aksi: `view`, `view_any`, `create`, `update`, `replicate`, `reorder`.
+  - Tambahan: dapat melihat konten draft (`view_unpublished_program`) untuk proses editing; akses widget dasar & dashboard pengajar.
+  - Batasan: tidak dapat `delete`/`restore`/`force_delete`; tidak mengelola `user`, `token`, `partner`, `learning_area`, atau `role`.
 
-    ```php
-    #google auth
-    GOOGLE_CLIENT_ID=
-    GOOGLE_CLIENT_SECRET=
-    GOOGLE_REDIRECT_URI=http://localhost:8000/admin/oauth/callback/google
-    ```
+- Pelajar
+  - Ruang lingkup: konten (`program`, `unit`, `material`, `partner`, `learning_area`).
+  - Aksi: hanya `view` dan `view_any` (read‑only).
+  - Tambahan: `request_enrollment` (pengajuan enrolmen jika fitur dibuka), akses widget dasar & dashboard pelajar.
+  - Batasan: tidak ada aksi tulis.
 
-7. Configure your resend for email sending (optional)
+Konvensi Penting
 
-    ```php
-    #resend
-    MAIL_MAILER=resend
-    MAIL_HOST=127.0.0.1
-    MAIL_PORT=2525
-    MAIL_USERNAME=null
-    MAIL_PASSWORD=null
-    MAIL_ENCRYPTION=null
-    RESEND_API_KEY=
-    MAIL_FROM_ADDRESS="admin@domain.com"
-    MAIL_FROM_NAME="${APP_NAME}"
-    ```
+- Publikasi Program: tindakan `publish_program`/`unpublish_program` mengubah `is_published`. Pengguna tanpa `view_unpublished_program` hanya melihat program terbit, enforced pada query tabel (lihat `app/Filament/Resources/ProgramResource/Table.php:24`).
+- Policy: contoh `ProgramPolicy` mengizinkan melihat draft jika punya `view_unpublished_program` atau dapat `update` (lihat `app/Policies/ProgramPolicy.php:16`).
 
-8. Migrate your database
+---
 
-    ```php
-    php artisan migrate --seed
-    ```
+## 🚦 Cara Menjalankan Proyek
 
-9. Serve the Application
+1. Clone repo ini:  
+   ```bash
+   git clone https://github.com/juniyasyos/tamasuma-backend.git
+   cd tamasuma-backend
 
-    ```script
-    composer run dev
-    ```
+2. Install dependencies:
 
-11. If run successfully you will get this login interface
+   ```bash
+   ./vendor/bin/sail composer install
+   ```
+3. Generate role & permission:
 
-    ![image.png](.github/images/login-screen.png)
+   ```bash
+   ./vendor/bin/sail artisan shield:generate --all
+   ```
+4. Buat super admin:
 
-12. When signed in it will show this (not much yet but it getting there :) )
+   ```bash
+   ./vendor/bin/sail artisan shield:super-admin
+   ```
+5. Jalankan server:
 
-    ![image.png](.github/images/after-login-without-rbac.png)
+   ```bash
+   ./vendor/bin/sail composer run dev
+   ```
 
-13. Next step is to setup the RBAC, first generate the role and permission
+> ⚠️ Pastikan `APP_DEBUG=false` di `.env` sebelum deploy ke production.
 
-    ```php
-    php artisan shield:generate --all
-    ```
+---
 
-14. It will ask which panel do you want to generate permission/policies for choose the admin panel.
-15. Setup the super admin using this command
+## 📖 Dokumentasi Terkait
 
-    ```php
-    php artisan shield:super-admin
-    ```
+* Endpoint API → [`docs/api/learning-areas.md`](docs/api/learning-areas.md)
+* Admin panel → `app/Providers/Filament/AdminPanelProvider.php`
+* Model inti → `app/Models/Program.php`, `LearningArea.php`, `Unit.php`
 
-    ![image.png](.github/images/provide-superadmin.png)
+---
 
-16. Choose your super admin user and login again.
+## 🤝 Kontribusi
 
-    ![image.png](.github/images/after-login-rbac.png)
+Kami sangat terbuka untuk kontribusi!
+Silakan fork repo ini, buat branch baru, lalu ajukan **Pull Request**.
 
-## Running on Docker with Laravel Sail
+---
 
-1. Clone the repository
+## 🙏 Terima Kasih
 
-```bash
-git clone https://github.com/siubie/kaido-kit.git
+* [Laravel](https://laravel.com/)
+* [FilamentPHP](https://filamentphp.com/)
+* [Semua kontributor](https://github.com/juniyasyos/tamasuma-backend/graphs/contributors)
+
+---
+
+## 💬 Support & Komunitas
+
+* 🐛 [Laporkan bug](https://github.com/juniyasyos/tamasuma-backend/issues)
+* 💡 [Ajukan fitur](https://github.com/juniyasyos/tamasuma-backend/issues)
+* 📧 Email: [juniyasyos@gmail.com](mailto:juniyasyos@gmail.com)
+* 💬 [WhatsApp](https://chat.whatsapp.com/+6285732431396)
+
+---
+
+## ⭐ Dukung Proyek Ini
+
+Jika project ini membantu, jangan lupa kasih **⭐ di GitHub**.
+Semakin banyak bintang, semakin semangat kami mengembangkan TAMASUMA! ✨
+
 ```
-
-2. Copy .env.example to .env
-
-```bash
-cp .env.example .env
-```
-
-3. Install dependencies
-
-```bash
-composer install
-```
-
-4. Install Laravel Sail
-
-```bash
-composer require laravel/sail --dev
-php artisan sail:install
-```
-
-5. Run Sail
-
-```bash
-./vendor/bin/sail up -d
-```
-
-6. Generate App Key
-
-```bash
-./vendor/bin/sail artisan key:generate
-```
-
-7. Run migration
-
-```bash
-./vendor/bin/sail artisan migrate --seed
-```
-
-8. Next step is to setup the RBAC, first generate the role and permission
-
-```bash
-./vendor/bin/sail artisan shield:generate --all
-```
-
-9. Setup the super admin using this command
-
-```bash
-./vendor/bin/sail artisan shield:super-admin
-```
-
-10. Serve the Application
-
-```bash
-./vendor/bin/sail composer run dev
-```
-
-## Security
-Set your app Debug to false in .env file
-```php
-APP_NAME="Kaido-Kit"
-APP_ENV=local
-APP_KEY=base64:gWUd7RPrCZm6iu7qFddY3039BQLroNHJ0nqKcBr8eeA=
-APP_DEBUG=false
-APP_TIMEZONE=UTC
-APP_URL=https://localhost:8000
-```
-
-## 🤝 Contributing
-
-We welcome contributions! Please follow these steps:
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 🙏 Acknowledgments
-
-- [FilamentPHP](https://filamentphp.com/)
-- [Laravel](https://laravel.com/)
-- All our amazing contributors
-
-## 💬 Support
-
-- 🐛 [Report a bug](https://github.com/siubie/kaido-kit/issues)
-- 💡 [Request a feature](https://github.com/siubie/kaido-kit/issues)
-- 📧 [Email support](mailto:putraprima@gmail.com)
-- 💬 [Discord community](https://discord.com/invite/RwqXDUJGPg)
-- 💬 [Whatsapp community](https://chat.whatsapp.com/HJtRp9Eo5wl6NhYIJbkuZL)
-
-## ⭐ Show your support
-For Indonesian community you can get support and the recording course for how to create this kit here :
-https://www.dosenngoding.com/courses/8
-
-Give a ⭐️ if this project helped you!
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=siubie/kaido-kit&type=Date)](https://star-history.com/#siubie/kaido-kit&Date)
