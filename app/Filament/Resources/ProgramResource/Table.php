@@ -4,6 +4,7 @@ namespace App\Filament\Resources\ProgramResource;
 
 use App\Filament\Resources\ProgramResource;
 use App\Models\Program;
+use BezhanSalleh\FilamentShield\Support\Utils;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Actions\{Action, ActionGroup, ViewAction, EditAction, ReplicateAction};
@@ -222,12 +223,14 @@ use App\Models\Enrollment;
                     ->label('Ajukan Ikut')
                     ->icon('heroicon-o-user-plus')
                     ->color('primary')
-                    ->authorize(fn() => (bool) (Auth::user()?->can('request_enrollment')))
+                    ->authorize(fn() => (bool) (Auth::user()?->can('request_enrollment')) && ! Auth::user()?->hasRole(Utils::getSuperAdminName()))
                     ->visible(function (Program $record) {
                         $userId = Auth::id();
                         if (! $userId) return false;
                         // Hanya tampil untuk user yang memiliki permission ajukan enrolmen (Pelajar)
                         if (! Auth::user()?->can('request_enrollment')) return false;
+                        // Kecualikan super admin dari aksi pengajuan
+                        if (Auth::user()?->hasRole(Utils::getSuperAdminName())) return false;
                         // Only when published, not ended, and not already requested/enrolled
                         $notEnded = (! $record->ends_at || $record->ends_at->isFuture());
                         if (! $record->is_published || ! $notEnded) return false;
