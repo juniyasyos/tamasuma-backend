@@ -4,6 +4,7 @@ namespace App\Filament\Widgets;
 
 use App\Models\Enrollment;
 use App\Models\Program;
+use BezhanSalleh\FilamentShield\Support\Utils;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -22,6 +23,12 @@ class StudentFocusWidget extends Widget
     {
         $u = Auth::user();
         if (!$u) return false;
+        // Explicitly hide from Super Admin regardless of Gate::before allowing all permissions
+        if (config('filament-shield.super_admin.enabled')
+            && method_exists($u, 'hasRole')
+            && $u->hasRole(Utils::getSuperAdminName())) {
+            return false;
+        }
         // Visible only for Pelajar based strictly on permissions
         return $u->can('dashboard.view.pelajar')
             && $u->can('view_widget_student_focus_widget');
