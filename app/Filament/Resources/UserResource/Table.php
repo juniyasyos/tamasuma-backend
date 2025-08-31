@@ -142,15 +142,19 @@ class Table extends UserResource
                         ->icon('heroicon-m-adjustments-vertical')
                         ->form([
                             Select::make('roles')
-                                ->label('Roles')
+                                ->label('Role')
                                 ->relationship('roles', 'name')
                                 ->multiple()
+                                ->maxItems(1)
                                 ->preload()
                                 ->searchable()
+                                ->native(false)
                                 ->required(),
                         ])
                         ->action(function (User $record, array $data) {
-                            $record->roles()->sync($data['roles'] ?? []);
+                            $roles = $data['roles'] ?? [];
+                            $first = is_array($roles) ? (array_slice($roles, 0, 1) ?: []) : (isset($roles) ? [$roles] : []);
+                            $record->roles()->sync($first);
                         })
                         ->successNotificationTitle('Roles berhasil diperbarui.'),
 
@@ -210,16 +214,20 @@ class Table extends UserResource
                         ->icon('heroicon-m-adjustments-vertical')
                         ->form([
                             Select::make('roles')
-                                ->label('Roles')
+                                ->label('Role')
                                 ->relationship('roles', 'name')
                                 ->multiple()
+                                ->maxItems(1)
                                 ->preload()
                                 ->searchable()
+                                ->native(false)
                                 ->required(),
                         ])
                         ->action(function ($records, array $data) {
+                            $roles = $data['roles'] ?? [];
+                            $first = is_array($roles) ? (array_slice($roles, 0, 1) ?: []) : (isset($roles) ? [$roles] : []);
                             foreach ($records as $user) {
-                                $user->roles()->sync($data['roles'] ?? []);
+                                $user->roles()->sync($first);
                             }
                         })
                         ->successNotificationTitle('Roles pengguna terpilih diperbarui.'),

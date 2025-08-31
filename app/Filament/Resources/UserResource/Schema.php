@@ -71,12 +71,14 @@ class Schema extends UserResource
                                     ->helperText('Boleh kosong. Jika kosong, avatar akan memakai inisial nama.'),
 
                                 Select::make('roles')
-                                    ->label('Peran (Roles)')
+                                    ->label('Peran (Role)')
                                     ->relationship('roles', 'name')
                                     ->multiple()
+                                    ->maxItems(1)
                                     ->preload()
                                     ->searchable()
-                                    ->helperText('Pilih satu atau lebih peran.'),
+                                    ->native(false)
+                                    ->helperText('Pilih tepat satu role (maks. 1 item).'),
                             ]),
                         ]),
 
