@@ -22,8 +22,10 @@ class WelcomingWidget extends Widget
 
     public static function canView(): bool
     {
-        // All authenticated users can see the welcome widget
-        return Auth::check();
+        $u = Auth::user();
+        if (!$u) return false;
+        // Use explicit permission when available; fallback to authenticated
+        return $u->can('view_widget_welcoming_widget') || $u !== null;
     }
 
     protected function getViewData(): array

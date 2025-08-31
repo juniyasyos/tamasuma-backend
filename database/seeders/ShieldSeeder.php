@@ -13,16 +13,16 @@ class ShieldSeeder extends Seeder
     {
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // HANYA entity yang sesuai dengan policy yang ada
+        // Entity yang saat ini tersedia sebagai Resource/fitur utama
+        // (sinkron dengan App\Filament\Resources dan fitur terkait)
         $entities = [
             'role',
-            'token',
             'user',
             'program',
-            'unit',
-            'material',
             'partner',
             'learning_area',
+            // Opsional: token (Sanctum) untuk fitur API token Breezy
+            'token',
         ];
 
         // Generator daftar permission standar untuk satu entity
@@ -56,8 +56,8 @@ class ShieldSeeder extends Seeder
             $permsByEntity[$e] = $makePerms($e, $allActions);
         }
 
-        // Kelompok entity konten
-        $contentEntities = ['program', 'unit', 'material', 'partner', 'learning_area'];
+        // Kelompok entity konten yang dikelola harian
+        $contentEntities = ['program', 'partner', 'learning_area'];
 
         // Role: super_admin (semua)
         $superAdminPerms = array_values(array_unique(array_merge(...array_values($permsByEntity))));
@@ -88,12 +88,15 @@ class ShieldSeeder extends Seeder
         }
         $pelajarPerms = array_values(array_unique($pelajarPerms));
 
-        // Widget permissions
+        // Widget permissions (selaraskan dengan widget yang ada di app/Filament/Widgets)
         $widgetPerms = [
             'view_widget_stat_overview',
             'view_widget_user_growth_chart',
             'view_widget_program_enrolment_chart',
             'view_widget_media_storage_chart',
+            // Widget baru yang berfokus pada user/pelajar
+            'view_widget_student_focus_widget',
+            'view_widget_welcoming_widget',
         ];
 
         // Custom permissions
@@ -125,6 +128,7 @@ class ShieldSeeder extends Seeder
                 'guard_name' => 'web',
                 'permissions' => array_values(array_unique(array_merge($pengajarPerms, [
                     'view_widget_stat_overview',
+                    'view_widget_welcoming_widget',
                     $dashboardAudiencePerms['pengajar'],
                     // Pengajar dapat melihat draft (untuk editing), tapi bukan publish
                     'view_unpublished_program',
@@ -146,6 +150,8 @@ class ShieldSeeder extends Seeder
                 'guard_name' => 'web',
                 'permissions' => array_values(array_unique(array_merge($pelajarPerms, [
                     'view_widget_stat_overview',
+                    'view_widget_student_focus_widget',
+                    'view_widget_welcoming_widget',
                     $dashboardAudiencePerms['pelajar'],
                     'request_enrollment',
                 ]))),

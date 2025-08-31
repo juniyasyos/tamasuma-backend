@@ -22,10 +22,10 @@ class StudentFocusWidget extends Widget
     {
         $u = Auth::user();
         if (!$u) return false;
-        // Prefer permission slug if configured
-        if ($u->can('dashboard.view.pelajar')) return true;
-        // Fallback to role name
-        return method_exists($u, 'hasRole') && ($u->hasRole('pelajar') || $u->hasRole('student') || $u->hasRole('mahasiswa'));
+        // Must have widget permission and be in pelajar audience
+        $audience = $u->can('dashboard.view.pelajar')
+            || (method_exists($u, 'hasRole') && ($u->hasRole('pelajar') || $u->hasRole('student') || $u->hasRole('mahasiswa')));
+        return $u->can('view_widget_student_focus_widget') && $audience;
     }
 
     protected function getViewData(): array
@@ -86,4 +86,3 @@ class StudentFocusWidget extends Widget
         });
     }
 }
-
