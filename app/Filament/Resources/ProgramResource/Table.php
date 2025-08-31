@@ -5,6 +5,7 @@ namespace App\Filament\Resources\ProgramResource;
 use App\Filament\Resources\ProgramResource;
 use App\Models\Program;
 use BezhanSalleh\FilamentShield\Support\Utils;
+use BezhanSalleh\FilamentShield\Support\Utils;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Actions\{Action, ActionGroup, ViewAction, EditAction, ReplicateAction};
@@ -220,7 +221,7 @@ use App\Models\Enrollment;
                     ->tooltip('Lihat detail'),
 
                 Action::make('apply')
-                    ->label('Ajukan Ikut')
+                    ->label('Daftar')
                     ->icon('heroicon-o-user-plus')
                     ->color('primary')
                     ->authorize(fn() => (bool) (Auth::user()?->can('request_enrollment')) && ! Auth::user()?->hasRole(Utils::getSuperAdminName()))
@@ -269,10 +270,40 @@ use App\Models\Enrollment;
                         ]);
 
                         Notification::make()
-                            ->title('Permohonan dikirim')
-                            ->body('Permohonan mengikuti program telah dikirim. Menunggu persetujuan admin.')
+                            ->title('Sukses')
+                            ->body('Daftar kirim.')
                             ->success()
                             ->send();
+                    }),
+
+                Action::make('cancel')
+                    ->label('Batal')
+                    ->icon('heroicon-o-x-mark')
+                    ->color('danger')
+                    ->authorize(fn() => (bool) (Auth::user()?->can('request_enrollment')) && ! Auth::user()?->hasRole(Utils::getSuperAdminName()))
+                    ->visible(function (Program $record) {
+                        $userId = Auth::id();
+                        if (! $userId) return false;
+                        if (! Auth::user()?->can('request_enrollment')) return false;
+                        if (Auth::user()?->hasRole(Utils::getSuperAdminName())) return false;
+                        // tampil bila ada pengajuan berstatus requested
+                        return Enrollment::where('user_id', $userId)
+                            ->where('program_id', $record->id)
+                            ->where('status', 'requested')
+                            ->exists();
+                    })
+                    ->requiresConfirmation()
+                    ->action(function (Program $record) {
+                        $userId = Auth::id();
+                        if (! $userId) return;
+                        $req = Enrollment::where('user_id', $userId)
+                            ->where('program_id', $record->id)
+                            ->where('status', 'requested')
+                            ->first();
+                        if ($req) {
+                            $req->delete();
+                            Notification::make()->title('Sukses')->body('Batal kirim.')->success()->send();
+                        }
                     }),
 
                 EditAction::make('edit')
