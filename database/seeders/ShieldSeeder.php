@@ -165,7 +165,6 @@ class ShieldSeeder extends Seeder
                 'permissions' => array_values(array_filter(array_merge(
                     $pelajarPerms,
                     [
-                        'view_widget_stat_overview',
                         'view_widget_student_focus_widget',
                         'view_widget_welcoming_widget',
                         $dashboardAudiencePerms['pelajar'] ?? null,

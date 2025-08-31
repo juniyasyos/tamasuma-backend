@@ -56,7 +56,8 @@ return [
         'pages' => true,
         'widgets' => true,
         'resources' => true,
-        'custom_permissions' => false,
+        // Enable to show standalone permissions (not tied to resources/pages/widgets)
+        'custom_permissions' => true,
     ],
 
     'generator' => [

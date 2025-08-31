@@ -22,10 +22,9 @@ class StudentFocusWidget extends Widget
     {
         $u = Auth::user();
         if (!$u) return false;
-        // Must have widget permission and be in pelajar audience
-        $audience = $u->can('dashboard.view.pelajar')
-            || (method_exists($u, 'hasRole') && ($u->hasRole('pelajar') || $u->hasRole('student') || $u->hasRole('mahasiswa')));
-        return $u->can('view_widget_student_focus_widget') && $audience;
+        // Visible only for Pelajar based strictly on permissions
+        return $u->can('dashboard.view.pelajar')
+            && $u->can('view_widget_student_focus_widget');
     }
 
     protected function getViewData(): array

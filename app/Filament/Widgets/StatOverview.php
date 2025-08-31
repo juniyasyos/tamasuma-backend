@@ -26,12 +26,37 @@ class StatOverview extends BaseWidget
     /**
      * Controls visibility of the widget itself.
      * Requires the user to have the 'view_widget_stat_overview' permission.
+     * Additionally, it is explicitly hidden for Pelajar (student) role.
      */
     public static function canView(): bool
     {
         $u = Auth::user();
+        if (!$u) return false;
+
+        // Hide for Pelajar explicitly (by permission or role alias)
+        $rolePermissions = (array) Config::get('dashboard.permissions', [
+            'super_admin' => 'dashboard.view.super_admin',
+            'admin' => 'dashboard.view.admin',
+            'pengajar' => 'dashboard.view.pengajar',
+            'pelajar' => 'dashboard.view.pelajar',
+        ]);
+        $pelajarPerm = $rolePermissions['pelajar'] ?? 'dashboard.view.pelajar';
+        if (method_exists($u, 'can') && $u->can($pelajarPerm)) {
+            return false;
+        }
+
+        $aliasesMap = (array) Config::get('dashboard.role_fallback.aliases', [
+            'pelajar' => ['pelajar', 'student', 'mahasiswa', 'learner'],
+        ]);
+        foreach ((array) ($aliasesMap['pelajar'] ?? []) as $alias) {
+            if (method_exists($u, 'hasRole') && $u->hasRole($alias)) {
+                return false;
+            }
+        }
+
         return $u?->can('view_widget_stat_overview') ?? false;
     }
+
     protected int|string|array $columnSpan = ['sm' => 2, 'md' => 2, 'lg' => 3, 'xl' => 4];
     protected static ?string $pollingInterval = '60s';
 
@@ -302,3 +327,4 @@ class StatOverview extends BaseWidget
         return 'guest';
     }
 }
+

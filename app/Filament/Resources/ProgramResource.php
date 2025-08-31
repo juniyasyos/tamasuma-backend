@@ -40,8 +40,9 @@ use Filament\Infolists\Components\ViewEntry as InfoViewEntry;
 use Filament\Infolists\Components\Tabs as InfoTabs;
 use Filament\Infolists\Components\Tabs\Tab as InfoTab;
 use Illuminate\Validation\Rule;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 
-class ProgramResource extends Resource
+class ProgramResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = Program::class;
 
@@ -106,5 +107,25 @@ class ProgramResource extends Resource
     public static function infolist(Infolist $infolist): Infolist
     {
         return ProgramInfolist::make($infolist);
+    }
+
+    /**
+     * Extend Filament Shield resource permissions with domain-specific actions
+     * so they appear in the Role permission selector under this resource.
+     */
+    public static function getPermissionPrefixes(): array
+    {
+        $defaults = (array) config('filament-shield.permission_prefixes.resource', [
+            'view', 'view_any', 'create', 'update', 'restore', 'restore_any', 'replicate', 'reorder', 'delete', 'delete_any', 'force_delete', 'force_delete_any',
+        ]);
+
+        $extras = [
+            'update_any',
+            'view_unpublished',
+            'publish',
+            'unpublish',
+        ];
+
+        return array_values(array_unique(array_merge($defaults, $extras)));
     }
 }
