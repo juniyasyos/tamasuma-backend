@@ -22,8 +22,9 @@ return [
     'super_admin' => [
         'enabled' => true,
         'name' => 'super_admin',
-        'define_via_gate' => false,
-        'intercept_gate' => 'before', // after
+        // Grant all abilities to users with the super admin role via Gate
+        'define_via_gate' => true,
+        'intercept_gate' => 'before', // or 'after'
     ],
 
     'panel_user' => [

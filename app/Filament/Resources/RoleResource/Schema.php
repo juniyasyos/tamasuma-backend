@@ -59,10 +59,11 @@ class Schema extends RoleResource
 
             Forms\Components\Section::make('Permissions')
                 ->description('Centang izin yang diperlukan. Gunakan tombol Select All untuk mempercepat.')
-                ->schema(static::getShieldFormComponents())
+                ->schema([
+                    static::getShieldFormComponents(),
+                ])
                 ->collapsible()
                 ->collapsed(),
         ];
     }
 }
-

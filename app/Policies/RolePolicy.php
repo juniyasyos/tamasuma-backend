@@ -3,12 +3,25 @@
 namespace App\Policies;
 
 use App\Models\User;
+use BezhanSalleh\FilamentShield\Support\Utils;
 use Spatie\Permission\Models\Role;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class RolePolicy
 {
     use HandlesAuthorization;
+
+    /**
+     * Always allow super admin to manage roles.
+     */
+    public function before(User $user, string $ability): ?bool
+    {
+        if (config('filament-shield.super_admin.enabled') && $user->hasRole(Utils::getSuperAdminName())) {
+            return true;
+        }
+
+        return null;
+    }
 
     /**
      * Determine whether the user can view any models.
