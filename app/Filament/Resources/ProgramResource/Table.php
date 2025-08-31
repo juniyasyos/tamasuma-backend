@@ -229,7 +229,7 @@ use App\Models\Enrollment;
             ->actions([
                 ViewAction::make('detail')
                     ->label('Detail')
-                    ->icon('heroicon-o-eye')
+                    ->icon('heroicon-o-eye')->color('gray')
                     ->url(fn(Program $record) => ProgramResource::getUrl('view', ['record' => $record]))
                     ->openUrlInNewTab(false)
                     ->iconButton()
@@ -372,7 +372,7 @@ use App\Models\Enrollment;
                     ->visible(fn(Program $record): bool => $adminOpsCount($record) > 1)
                     ->label('Lainnya')
                     ->icon('heroicon-m-ellipsis-horizontal')
-                    ->button()
+                    ->button()->color('gray')
                     ->size('sm'),
 
                 // Show a single, direct action instead of grouped menu when only one is available
@@ -397,12 +397,14 @@ use App\Models\Enrollment;
                 Action::make('openExternal_single')
                     ->label('Buka Link Program')
                     ->icon('heroicon-o-arrow-top-right-on-square')
+                    ->color('info')
                     ->url(fn(Program $record) => $record->external_url ?: '#', true)
                     ->visible(fn(Program $record) => $hasExternalLink($record) && $adminOpsCount($record) <= 1),
 
                 ReplicateAction::make('duplicate_single')
                     ->label('Duplikat')
                     ->icon('heroicon-o-document-duplicate')
+                    ->color('info')
                     ->visible(fn(Program $record) => $canReplicate($record) && $adminOpsCount($record) <= 1)
                     ->mutateRecordDataUsing(function (array $data, Program $record): array {
                         $newTitle = $record->title . ' (Copy)';

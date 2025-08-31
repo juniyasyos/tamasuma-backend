@@ -124,13 +124,13 @@ class Table extends UserResource
                 // Aksi utama (ikon saja biar hemat ruang)
                 ViewAction::make('detail')
                     ->label('Detail')
-                    ->icon('heroicon-o-eye')
+                    ->icon('heroicon-o-eye')->color('gray')
                     ->iconButton()
                     ->tooltip('Lihat detail'),
 
                 EditAction::make('edit')
                     ->label('Edit')
-                    ->icon('heroicon-o-pencil-square')
+                    ->icon('heroicon-o-pencil-square')->color('warning')
                     ->slideOver()
                     ->iconButton()
                     ->tooltip('Edit pengguna'),
@@ -194,7 +194,7 @@ class Table extends UserResource
                 ])
                     ->label('Lainnya')
                     ->icon('heroicon-m-ellipsis-horizontal')
-                    ->button()
+                    ->button()->color('gray')
                     ->size('sm'),
             ])
             ->headerActions([
