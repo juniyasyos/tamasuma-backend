@@ -59,39 +59,59 @@ class LearningAreaResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->heading('Bidang')
+            ->description('Kelola bidang belajar.')
+            ->defaultSort('name')
+            ->recordUrl(fn($record) => static::getUrl('edit', ['record' => $record]))
             ->columns([
                 TextColumn::make('name')
                     ->label('Nama')
                     ->searchable()
                     ->sortable()
-                    ->description(fn($record) => $record->slug)
-                    ->weight('medium'),
+                    ->weight('medium')
+                    ->limit(40)
+                    ->description(fn($record) => $record->slug),
 
-                IconColumn::make('is_active')
+                TextColumn::make('programs_count')
+                    ->label('Program')
+                    ->counts('programs')
+                    ->badge()
+                    ->sortable(),
+
+                ToggleColumn::make('is_active')
                     ->label('Aktif')
-                    ->boolean()
-                    ->trueIcon('heroicon-m-check-circle')
-                    ->falseIcon('heroicon-m-x-circle')
-                    ->trueColor('success')
-                    ->falseColor('gray'),
+                    ->sortable(),
 
                 TextColumn::make('created_at')
                     ->label('Dibuat')
                     ->since()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Tables\Filters\TernaryFilter::make('is_active')
-                    ->label('Status Aktif'),
+                    ->label('Aktif'),
+                Tables\Filters\TernaryFilter::make('has_programs')
+                    ->label('Program')
+                    ->queries(
+                        true: fn($q) => $q->has('programs'),
+                        false: fn($q) => $q->doesntHave('programs'),
+                        blank: fn($q) => $q,
+                    ),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\EditAction::make()->iconButton(),
+                Tables\Actions\DeleteAction::make()->iconButton(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
+            ])
+            ->emptyStateHeading('Belum ada')
+            ->emptyStateDescription('Buat bidang baru untuk mulai.')
+            ->emptyStateActions([
+                Tables\Actions\CreateAction::make()->label('Buat'),
             ]);
     }
 
