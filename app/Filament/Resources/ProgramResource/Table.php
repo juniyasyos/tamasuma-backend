@@ -49,6 +49,7 @@ use App\Models\Enrollment;
             ->description('Kelola program pembelajaran internal maupun eksternal.')
             ->recordUrl(fn(Model $record) => ProgramResource::getUrl('view', ['record' => $record]))
             ->columns([
+                // Public-friendly columns (visible to all with access)
                 TextColumn::make('title')
                     ->label('Judul')
                     ->searchable(isIndividual: true)
@@ -101,6 +102,7 @@ use App\Models\Enrollment;
                     ->falseColor('gray')
                     ->sortable(),
 
+                // Admin/Editor-only operational/meta columns
                 IconColumn::make('is_published')
                     ->label('Terbitkan')
                     ->boolean()
@@ -108,7 +110,13 @@ use App\Models\Enrollment;
                     ->falseIcon('heroicon-m-x-circle')
                     ->trueColor('success')
                     ->falseColor('gray')
-                    ->sortable(),
+                    ->sortable()
+                    ->visible(fn() => (bool) (
+                        Auth::user()?->can('view_unpublished_program')
+                        || Auth::user()?->can('update_any_program')
+                        || Auth::user()?->can('publish_program')
+                        || Auth::user()?->can('unpublish_program')
+                    )),
 
                 TextColumn::make('enrollments_count')
                     ->label('Enrolmen')
@@ -116,13 +124,21 @@ use App\Models\Enrollment;
                     ->badge()
                     ->color(fn($state) => $state > 0 ? 'success' : 'gray')
                     ->toggleable(isToggledHiddenByDefault: true)
-                    ->alignRight(),
+                    ->alignRight()
+                    ->visible(fn() => (bool) (
+                        Auth::user()?->can('view_unpublished_program')
+                        || Auth::user()?->can('update_any_program')
+                    )),
 
                 TextColumn::make('created_at')
                     ->label('Dibuat')
                     ->dateTime('d M Y')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->visible(fn() => (bool) (
+                        Auth::user()?->can('view_unpublished_program')
+                        || Auth::user()?->can('update_any_program')
+                    )),
 
                 TextColumn::make('starts_at')
                     ->label('Mulai')
@@ -183,7 +199,8 @@ use App\Models\Enrollment;
                         true  => 'Publik',
                         false => 'Draft',
                         default => null,
-                    }),
+                    })
+                    ->visible(fn() => (bool) Auth::user()?->can('view_unpublished_program')),
 
                 TernaryFilter::make('is_certified')
                     ->label('Sertifikat')
