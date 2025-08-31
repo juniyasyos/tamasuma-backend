@@ -64,6 +64,8 @@ class ShieldSeeder extends Seeder
             $adminPerms = array_merge($adminPerms, $permsByEntity[$e]);
         }
         $adminPerms = array_values(array_filter($adminPerms, fn($p) => !str_contains($p, 'force_delete')));
+        // Tambahkan izin Role terbatas agar Admin dapat mengelola permissions tanpa hapus permanen
+        $adminPerms = array_merge($adminPerms, $makePerms('role', ['view', 'view_any', 'create', 'update']));
 
         // Pengajar: read + create/update (tanpa restore/delete)
         $pengajarEntities = ['program', 'unit', 'material']; // 'unit' & 'material' bisa belum jadi Resource, ini tetap aman
@@ -114,19 +116,20 @@ class ShieldSeeder extends Seeder
         // 4) Definisi Role & Izin
         // =========================
 
-        // ⚠️ SUPER ADMIN:
-        // Jangan sync permission apa pun.
-        // Filament Shield akan memberi "semua izin" via Gate::before
-        // asalkan role name = config super admin (biasanya "super_admin").
+        // SUPER ADMIN: memiliki SEMUA permission yang dikenali sistem.
+        // (Tetap kompatibel dengan Gate::before milik Filament Shield.)
+        $allEntityPerms = array_values(array_unique(array_merge(...array_values($permsByEntity))));
+        $superAllPerms  = array_values(array_filter(array_unique(array_merge(
+            $allEntityPerms,
+            $widgetPerms,
+            $customPerms,
+            array_values($dashboardAudiencePerms),
+        ))));
         $roles = [
             [
                 'name'        => 'super_admin',
                 'guard_name'  => 'web',
-                'permissions' => [
-                    // cukup permission kontekstual (mis. audience dashboard) bila memang dipakai UI,
-                    // tidak wajib, tapi boleh:
-                    $dashboardAudiencePerms['super_admin'] ?? null,
-                ],
+                'permissions' => $superAllPerms,
             ],
             [
                 'name'        => 'Admin',
