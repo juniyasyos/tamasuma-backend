@@ -92,7 +92,7 @@ class ShieldSeeder extends Seeder
             'view_widget_user_growth_chart',
             'view_widget_program_enrolment_chart',
             'view_widget_media_storage_chart',
-            'view_widget_student_focus_widget',
+            // 'view_widget_student_focus_widget',
             'view_widget_welcoming_widget',
         ];
 
