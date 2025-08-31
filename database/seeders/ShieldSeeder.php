@@ -11,22 +11,22 @@ class ShieldSeeder extends Seeder
 {
     public function run(): void
     {
-        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
 
-        // Entity yang saat ini tersedia sebagai Resource/fitur utama
-        // (sinkron dengan App\Filament\Resources dan fitur terkait)
+        // =========================
+        // 1) Definisi Entity & Aksi
+        // =========================
         $entities = [
             'role',
             'user',
             'program',
             'partner',
             'learning_area',
-            // Opsional: token (Sanctum) untuk fitur API token Breezy
+            // opsional (API tokens / Breezy):
             'token',
         ];
 
-        // Generator daftar permission standar untuk satu entity
-        $allActions = [
+        $actions = [
             'view',
             'view_any',
             'create',
@@ -41,170 +41,183 @@ class ShieldSeeder extends Seeder
             'force_delete_any',
         ];
 
-        $makePerms = function (string $entity, array $actions) {
-            return array_map(
-                fn($a) => ($a === 'view_any' || $a === 'restore_any' || $a === 'delete_any' || $a === 'force_delete_any')
-                    ? "{$a}_{$entity}"
-                    : "{$a}_{$entity}",
-                $actions
-            );
+        $makePerms = static function (string $entity, array $actions): array {
+            // semua format nama permission konsisten: "{aksi}_{entity}"
+            return array_map(fn($a) => "{$a}_{$entity}", $actions);
         };
 
-        // Kumpulan permission lengkap per entity
+        // Precompute perms per-entity (hemat perulangan)
         $permsByEntity = [];
         foreach ($entities as $e) {
-            $permsByEntity[$e] = $makePerms($e, $allActions);
+            $permsByEntity[$e] = $makePerms($e, $actions);
         }
 
-        // Kelompok entity konten yang dikelola harian
+        // =========================
+        // 2) Kelompok Per-Role
+        // =========================
         $contentEntities = ['program', 'partner', 'learning_area'];
 
-        // Role: super_admin (semua)
-        $superAdminPerms = array_values(array_unique(array_merge(...array_values($permsByEntity))));
-
-        // Role: admin (full pada konten + user + token) — tidak mengelola role
+        // Admin: full pada konten + user + token, tanpa force_delete*
         $adminEntities = array_merge($contentEntities, ['user', 'token']);
         $adminPerms = [];
         foreach ($adminEntities as $e) {
             $adminPerms = array_merge($adminPerms, $permsByEntity[$e]);
         }
-        // Optional hardening: hilangkan force_delete untuk admin
-        $adminPerms = array_values(array_unique(array_filter($adminPerms, fn($p) => ! str_contains($p, 'force_delete'))));
+        $adminPerms = array_values(array_filter($adminPerms, fn($p) => !str_contains($p, 'force_delete')));
 
-        // Role: Pengajar (read + update konten pembelajaran; tanpa restore/delete)
+        // Pengajar: read + create/update (tanpa restore/delete)
+        $pengajarEntities = ['program', 'unit', 'material']; // 'unit' & 'material' bisa belum jadi Resource, ini tetap aman
+        $pengajarActions = ['view', 'view_any', 'create', 'update', 'replicate', 'reorder'];
         $pengajarPerms = [];
-        $pengajarAllowedEntities = ['program', 'unit', 'material'];
-        $pengajarAllowed = ['view', 'view_any', 'create', 'update', 'replicate', 'reorder'];
-        foreach ($pengajarAllowedEntities as $e) {
-            $pengajarPerms = array_merge($pengajarPerms, $makePerms($e, $pengajarAllowed));
+        foreach ($pengajarEntities as $e) {
+            $pengajarPerms = array_merge($pengajarPerms, $makePerms($e, $pengajarActions));
         }
         $pengajarPerms = array_values(array_unique($pengajarPerms));
 
-        // Role: pelajar (read-only pada konten)
+        // Pelajar: read-only pada konten
+        $pelajarActions = ['view', 'view_any'];
         $pelajarPerms = [];
-        $pelajarAllowed = ['view', 'view_any'];
         foreach ($contentEntities as $e) {
-            $pelajarPerms = array_merge($pelajarPerms, $makePerms($e, $pelajarAllowed));
+            $pelajarPerms = array_merge($pelajarPerms, $makePerms($e, $pelajarActions));
         }
         $pelajarPerms = array_values(array_unique($pelajarPerms));
 
-        // Widget permissions (selaraskan dengan widget yang ada di app/Filament/Widgets)
+        // =========================
+        // 3) Widget & Custom Perms
+        // =========================
         $widgetPerms = [
             'view_widget_stat_overview',
             'view_widget_user_growth_chart',
             'view_widget_program_enrolment_chart',
             'view_widget_media_storage_chart',
-            // Widget baru yang berfokus pada user/pelajar
             'view_widget_student_focus_widget',
             'view_widget_welcoming_widget',
         ];
 
-        // Custom permissions
         $customPerms = [
             'update_any_program',
             'view_unpublished_program',
             'publish_program',
             'unpublish_program',
+            'request_enrollment', // dipakai di Pelajar pada contoh sebelumnya
         ];
 
-        // Dashboard audience permissions (used by StatOverview detection)
+        // Dashboard audience (fallback bila config tidak ada)
         $dashboardAudiencePerms = (array) Config::get('dashboard.permissions', [
             'super_admin' => 'dashboard.view.super_admin',
-            'admin' => 'dashboard.view.admin',
-            'pengajar' => 'dashboard.view.pengajar',
-            'pelajar' => 'dashboard.view.pelajar',
+            'admin'       => 'dashboard.view.admin',
+            'pengajar'    => 'dashboard.view.pengajar',
+            'pelajar'     => 'dashboard.view.pelajar',
         ]);
 
-        $rolesWithPermissions = json_encode([
-            [
-                'name' => 'super_admin',
-                'guard_name' => 'web',
-                'permissions' => array_values(array_unique(array_merge($superAdminPerms, $widgetPerms, $customPerms, [
-                    $dashboardAudiencePerms['super_admin'],
-                ]))),
-            ],
-            [
-                'name' => 'Pengajar',
-                'guard_name' => 'web',
-                'permissions' => array_values(array_unique(array_merge($pengajarPerms, [
-                    'view_widget_stat_overview',
-                    'view_widget_welcoming_widget',
-                    $dashboardAudiencePerms['pengajar'],
-                    // Pengajar dapat melihat draft (untuk editing), tapi bukan publish
-                    'view_unpublished_program',
-                ]))),
-            ],
-            [
-                'name' => 'Admin',
-                'guard_name' => 'web',
-                'permissions' => array_values(array_unique(array_merge($adminPerms, $widgetPerms, [
-                    $dashboardAudiencePerms['admin'],
-                    'update_any_program',
-                    'view_unpublished_program',
-                    'publish_program',
-                    'unpublish_program',
-                ]))),
-            ],
-            [
-                'name' => 'Pelajar',
-                'guard_name' => 'web',
-                'permissions' => array_values(array_unique(array_merge($pelajarPerms, [
-                    'view_widget_stat_overview',
-                    'view_widget_student_focus_widget',
-                    'view_widget_welcoming_widget',
-                    $dashboardAudiencePerms['pelajar'],
-                    'request_enrollment',
-                ]))),
-            ],
-        ]);
+        // =========================
+        // 4) Definisi Role & Izin
+        // =========================
 
-        // Tidak ada directPermissions lain di luar policy — kosongkan
-        $directPermissions = '[]';
+        // ⚠️ SUPER ADMIN:
+        // Jangan sync permission apa pun.
+        // Filament Shield akan memberi "semua izin" via Gate::before
+        // asalkan role name = config super admin (biasanya "super_admin").
+        $roles = [
+            [
+                'name'        => 'super_admin',
+                'guard_name'  => 'web',
+                'permissions' => [
+                    // cukup permission kontekstual (mis. audience dashboard) bila memang dipakai UI,
+                    // tidak wajib, tapi boleh:
+                    $dashboardAudiencePerms['super_admin'] ?? null,
+                ],
+            ],
+            [
+                'name'        => 'Admin',
+                'guard_name'  => 'web',
+                'permissions' => array_values(array_filter(array_merge(
+                    $adminPerms,
+                    $widgetPerms,
+                    [
+                        $dashboardAudiencePerms['admin'] ?? null,
+                        'update_any_program',
+                        'view_unpublished_program',
+                        'publish_program',
+                        'unpublish_program',
+                    ]
+                ))),
+            ],
+            [
+                'name'        => 'Pengajar',
+                'guard_name'  => 'web',
+                'permissions' => array_values(array_filter(array_merge(
+                    $pengajarPerms,
+                    [
+                        'view_widget_stat_overview',
+                        'view_widget_welcoming_widget',
+                        $dashboardAudiencePerms['pengajar'] ?? null,
+                        'view_unpublished_program', // lihat draft untuk editing
+                    ]
+                ))),
+            ],
+            [
+                'name'        => 'Pelajar',
+                'guard_name'  => 'web',
+                'permissions' => array_values(array_filter(array_merge(
+                    $pelajarPerms,
+                    [
+                        'view_widget_stat_overview',
+                        'view_widget_student_focus_widget',
+                        'view_widget_welcoming_widget',
+                        $dashboardAudiencePerms['pelajar'] ?? null,
+                        'request_enrollment',
+                    ]
+                ))),
+            ],
+        ];
 
-        static::makeRolesWithPermissions($rolesWithPermissions);
-        static::makeDirectPermissions($directPermissions);
+        // =========================
+        // 5) Persist Role & Permission
+        // =========================
+        static::syncRoles($roles);
 
-        $this->command->info('Shield Seeding Completed (policy-only).');
+        // Tidak ada directPermissions di luar role/policy
+        $this->command->info('Shield Seeding Completed (lean, super_admin via Gate::before).');
     }
 
-    protected static function makeRolesWithPermissions(string $rolesWithPermissions): void
+    /**
+     * Membuat role & izin secara efisien:
+     * - FirstOrCreate untuk permission unik
+     * - syncPermissions per role (kecuali super_admin tidak wajib, tapi kita biarkan item non-null)
+     */
+    protected static function syncRoles(array $roles): void
     {
-        if (! blank($rolePlusPermissions = json_decode($rolesWithPermissions, true))) {
-            $roleModel = Utils::getRoleModel();
-            $permissionModel = Utils::getPermissionModel();
+        $roleModel = Utils::getRoleModel();
+        $permissionModel = Utils::getPermissionModel();
 
-            foreach ($rolePlusPermissions as $rolePlusPermission) {
-                $role = $roleModel::firstOrCreate([
-                    'name' => $rolePlusPermission['name'],
-                    'guard_name' => $rolePlusPermission['guard_name'],
-                ]);
-
-                if (! blank($rolePlusPermission['permissions'])) {
-                    $permissionModels = collect($rolePlusPermission['permissions'])
-                        ->map(fn($permission) => $permissionModel::firstOrCreate([
-                            'name' => $permission,
-                            'guard_name' => $rolePlusPermission['guard_name'],
-                        ]))
-                        ->all();
-
-                    $role->syncPermissions($permissionModels);
-                }
+        // Kumpulkan semua permission unik selain null
+        $allPerms = [];
+        foreach ($roles as $r) {
+            foreach (($r['permissions'] ?? []) as $p) {
+                if ($p) $allPerms[$p] = true;
             }
         }
-    }
 
-    public static function makeDirectPermissions(string $directPermissions): void
-    {
-        if (! blank($permissions = json_decode($directPermissions, true))) {
-            $permissionModel = Utils::getPermissionModel();
+        // Buat seluruh permission sekali jalan
+        $permissionInstances = [];
+        foreach (array_keys($allPerms) as $pName) {
+            $permissionInstances[$pName] = $permissionModel::firstOrCreate([
+                'name'       => $pName,
+                'guard_name' => 'web',
+            ]);
+        }
 
-            foreach ($permissions as $permission) {
-                if ($permissionModel::whereName($permission)->doesntExist()) {
-                    $permissionModel::create([
-                        'name' => $permission['name'],
-                        'guard_name' => $permission['guard_name'],
-                    ]);
-                }
+        // Buat role & sinkronkan izin (kecuali super_admin tidak butuh apa-apa sebenarnya)
+        foreach ($roles as $r) {
+            $role = $roleModel::firstOrCreate([
+                'name'       => $r['name'],
+                'guard_name' => $r['guard_name'] ?? 'web',
+            ]);
+
+            $perms = array_values(array_filter($r['permissions'] ?? []));
+            if (!empty($perms)) {
+                $role->syncPermissions(collect($perms)->map(fn($p) => $permissionInstances[$p])->all());
             }
         }
     }
