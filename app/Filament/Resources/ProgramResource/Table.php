@@ -29,6 +29,13 @@ use App\Models\Enrollment;
         $canReplicate = fn(Program $record): bool => (bool) (Auth::user()?->can('replicate', $record));
         $canPublish = fn(Program $record): bool => (bool) (Auth::user()?->can('publish_program'));
         $canUnpublish = fn(Program $record): bool => (bool) (Auth::user()?->can('unpublish_program'));
+        $hasExternalLink = fn(Program $record): bool => $record->source === 'external' && filled($record->external_url);
+        $adminOpsCount = function (Program $record) use ($canPublish, $canUnpublish, $hasExternalLink, $canReplicate): int {
+            return (int) $canPublish($record)
+                + (int) $canUnpublish($record)
+                + (int) $hasExternalLink($record)
+                + (int) $canReplicate($record);
+        };
 
         return $table
             ->modifyQueryUsing(function (Builder $query): Builder {
@@ -135,6 +142,17 @@ use App\Models\Enrollment;
                 Tables\Grouping\Group::make('level')->label('Kelompok Level')->collapsible(),
             ])
             ->filters([
+                TernaryFilter::make('enrolled_by_me')
+                    ->label('Keikutsertaan')
+                    ->placeholder('Semua Program')
+                    ->trueLabel('Diikuti Saya')
+                    ->falseLabel('Tidak Diikuti')
+                    ->queries(
+                        true: fn (Builder $query): Builder => $query->whereHas('enrollments', fn ($q) => $q->where('user_id', Auth::id())),
+                        false: fn (Builder $query): Builder => $query->whereDoesntHave('enrollments', fn ($q) => $q->where('user_id', Auth::id())),
+                        blank: fn (Builder $query): Builder => $query,
+                    )
+                    ->visible(fn (): bool => Auth::check()),
                 SelectFilter::make('learning_area_id')
                     ->label('Bidang')
                     ->relationship('learningArea', 'name')
@@ -285,7 +303,7 @@ use App\Models\Enrollment;
                         ->label('Buka Link Program')
                         ->icon('heroicon-o-arrow-top-right-on-square')
                         ->url(fn(Program $record) => $record->external_url ?: '#', true)
-                        ->visible(fn(Program $record) => $record->source === 'external' && filled($record->external_url)),
+                        ->visible(fn(Program $record) => $hasExternalLink($record)),
 
                     ReplicateAction::make('duplicate')
                         ->label('Duplikat')
@@ -300,18 +318,49 @@ use App\Models\Enrollment;
                         })
                         ->successNotificationTitle('Program diduplikasi (status: draft).'),
                 ])
-                    ->visible(function (Program $record) use ($canUpdate, $canReplicate, $canPublish, $canUnpublish): bool {
-                        // Show group only if any action inside is visible/authorized
-                        return $canUpdate($record)
-                            || $canPublish($record)
-                            || $canUnpublish($record)
-                            || ($record->source === 'external' && filled($record->external_url))
-                            || $canReplicate($record);
-                    })
+                    ->visible(fn(Program $record): bool => $adminOpsCount($record) > 1)
                     ->label('Lainnya')
                     ->icon('heroicon-m-ellipsis-horizontal')
                     ->button()
                     ->size('sm'),
+
+                // Show a single, direct action instead of grouped menu when only one is available
+                Action::make('publish_single')
+                    ->label('Publikasikan')
+                    ->icon('heroicon-o-eye')
+                    ->color('success')
+                    ->visible(fn(Program $record) => !$record->is_published && $canPublish($record) && $adminOpsCount($record) <= 1)
+                    ->requiresConfirmation()
+                    ->action(fn(Program $record) => $record->update(['is_published' => true]))
+                    ->successNotificationTitle('Program dipublikasikan.'),
+
+                Action::make('unpublish_single')
+                    ->label('Jadikan Draft')
+                    ->icon('heroicon-o-eye-slash')
+                    ->color('gray')
+                    ->visible(fn(Program $record) => $record->is_published && $canUnpublish($record) && $adminOpsCount($record) <= 1)
+                    ->requiresConfirmation()
+                    ->action(fn(Program $record) => $record->update(['is_published' => false]))
+                    ->successNotificationTitle('Program diubah menjadi draft.'),
+
+                Action::make('openExternal_single')
+                    ->label('Buka Link Program')
+                    ->icon('heroicon-o-arrow-top-right-on-square')
+                    ->url(fn(Program $record) => $record->external_url ?: '#', true)
+                    ->visible(fn(Program $record) => $hasExternalLink($record) && $adminOpsCount($record) <= 1),
+
+                ReplicateAction::make('duplicate_single')
+                    ->label('Duplikat')
+                    ->icon('heroicon-o-document-duplicate')
+                    ->visible(fn(Program $record) => $canReplicate($record) && $adminOpsCount($record) <= 1)
+                    ->mutateRecordDataUsing(function (array $data, Program $record): array {
+                        $newTitle = $record->title . ' (Copy)';
+                        $data['title'] = $newTitle;
+                        $data['slug'] = Str::slug($record->slug . '-copy-' . Str::random(4));
+                        $data['is_published'] = false;
+                        return $data;
+                    })
+                    ->successNotificationTitle('Program diduplikasi (status: draft).'),
             ])
             ->bulkActions([])
             ->emptyStateHeading('Belum ada program')
