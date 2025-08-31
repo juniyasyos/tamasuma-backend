@@ -226,6 +226,8 @@ use App\Models\Enrollment;
                     ->visible(function (Program $record) {
                         $userId = Auth::id();
                         if (! $userId) return false;
+                        // Hanya tampil untuk user yang memiliki permission ajukan enrolmen (Pelajar)
+                        if (! Auth::user()?->can('request_enrollment')) return false;
                         // Only when published, not ended, and not already requested/enrolled
                         $notEnded = (! $record->ends_at || $record->ends_at->isFuture());
                         if (! $record->is_published || ! $notEnded) return false;
