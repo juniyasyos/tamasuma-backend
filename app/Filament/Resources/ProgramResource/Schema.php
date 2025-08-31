@@ -78,11 +78,10 @@ class Schema extends ProgramResource
                                             })
                                             ->helperText('Gunakan judul singkat & jelas (maks. 100 karakter).'),
 
-                                    TextInput::make('slug')
+                                        TextInput::make('slug')
                                             ->label('Slug URL')
                                             ->readOnly()
-                                            ->unique(ignoreRecord: true)
-                                            ,
+                                            ->unique(ignoreRecord: true),
 
                                         DatePicker::make('starts_at')
                                             ->label('Mulai')
@@ -141,7 +140,7 @@ class Schema extends ProgramResource
                                         // ->disabled()
                                         ->inline()
                                         ->required(),
-                                        // ->live(),
+                                    // ->live(),
 
                                     TextInput::make('platform')
                                         ->label('Platform')
@@ -177,54 +176,6 @@ class Schema extends ProgramResource
                                 ]),
                         ]),
 
-                    Tab::make('Pendaftaran')
-                        ->icon('heroicon-o-user-group')
-                        ->schema([
-                            Forms\Components\Repeater::make('enrollments')
-                                ->relationship('enrollments')
-                                ->label('Enrolmen Pengguna')
-                                ->addActionLabel('Tambah Enrolmen')
-                                ->defaultItems(0)
-                                ->columns(2)
-                                ->schema([
-                                    Forms\Components\Select::make('user_id')
-                                        ->label('Pengguna')
-                                        ->relationship('user', 'name')
-                                        ->searchable()
-                                        ->preload()
-                                        ->required()
-                                        ->native(false)
-                                        ->disableOptionsWhenSelectedInSiblingRepeaterItems()
-                                        ->helperText('Setiap pengguna hanya boleh terdaftar sekali pada program ini.'),
-
-                                    Forms\Components\Select::make('status')
-                                        ->label('Status')
-                                        ->options([
-                                            'requested' => 'Menunggu Persetujuan',
-                                            'active' => 'Aktif',
-                                            'completed' => 'Selesai',
-                                            'dropped' => 'Berhenti',
-                                        ])
-                                        ->required()
-                                        ->native(false),
-
-                                    Forms\Components\DatePicker::make('enrolled_at')
-                                        ->label('Tanggal Daftar')
-                                        ->native(false),
-
-                                    Forms\Components\DatePicker::make('completed_at')
-                                        ->label('Tanggal Selesai')
-                                        ->native(false),
-
-                                    Forms\Components\Textarea::make('notes')
-                                        ->label('Catatan')
-                                        ->rows(2)
-                                        ->columnSpanFull(),
-                                ])
-                                ->reorderable(false)
-                                ->grid(1)
-                                ->helperText('Kelola pengguna yang terdaftar pada program ini.'),
-                        ]),
                 ])
         ];
     }

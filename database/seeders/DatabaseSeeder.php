@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
                 LearningPlatformSeeder::class,
                 PartnerSeeder::class,
                 ShieldSeeder::class,
+                UsersWithRolesSeeder::class,
             ]
         );
     }
