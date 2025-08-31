@@ -53,6 +53,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'mute_program_enrollment_notifications' => 'boolean',
         ];
     }
 
