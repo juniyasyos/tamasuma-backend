@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use App\Filament\Widgets\Stats\RoleStatsFactory;
+use BezhanSalleh\FilamentShield\Support\Utils;
 
 /**
  * StatOverview widget
@@ -32,6 +33,13 @@ class StatOverview extends BaseWidget
     {
         $u = Auth::user();
         if (!$u) return false;
+
+        // Always allow Super Admin to view, regardless of other checks
+        if (config('filament-shield.super_admin.enabled')
+            && method_exists($u, 'hasRole')
+            && $u->hasRole(Utils::getSuperAdminName())) {
+            return true;
+        }
 
         // Hide for Pelajar explicitly (by permission or role alias)
         $rolePermissions = (array) Config::get('dashboard.permissions', [
@@ -327,4 +335,3 @@ class StatOverview extends BaseWidget
         return 'guest';
     }
 }
-
