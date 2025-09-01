@@ -84,7 +84,7 @@
             "rm -rf ./storage/debugbar/*.json",
             "@php artisan migrate:fresh --seed",
             "@php artisan shield:generate --all --panel=admin",
-            "@php artisan shield:super-admin --user=11",
+            "@php artisan shield:super-admin --user=1",
             "git clean -f && git reset --hard"
         ]
     },
