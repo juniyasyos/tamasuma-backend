@@ -34,7 +34,7 @@
         <div wire:loading.remove class="space-y-8">
             {{-- SECTION: Lanjutkan Belajar (nested section) --}}
             <x-filament::section heading="Lanjutkan Belajar" description="Program yang sedang kamu ikuti."
-                class="mt-8 p-4 rounded-xl border border-gray-200 dark:border-gray-700">
+                style="margin-top:2rem; padding:1rem; border:1px solid border-radius:12px;">
                 @if (count($continueEnrollments))
                     <ul role="list" class="flex flex-col gap-3">
                         @foreach ($continueEnrollments as $en)
@@ -50,7 +50,8 @@
                                                 {{ $p?->title ?? '-' }}
                                             </div>
 
-                                            <div class="mt-1 flex items-center gap-2 flex-wrap text-xs text-gray-500 dark:text-gray-400">
+                                            <div
+                                                class="mt-1 flex items-center gap-2 flex-wrap text-xs text-gray-500 dark:text-gray-400">
                                                 @if ($p?->learningArea?->name)
                                                     <span
                                                         class="fi-badge fi-color-gray">{{ $p->learningArea->name }}</span>
@@ -72,7 +73,8 @@
                                                         <div class="h-1.5 bg-primary-500"
                                                             style="width: {{ (int) $en->progress }}%"></div>
                                                     </div>
-                                                    <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ (int) $en->progress }}%
+                                                    <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                                        {{ (int) $en->progress }}%
                                                         selesai</div>
                                                 </div>
                                             @endif
@@ -100,8 +102,6 @@
                     </x-filament::card>
                 @endif
             </x-filament::section>
-
-
 
             {{-- SECTION: Tenggat Mendekat (nested section) --}}
             <x-filament::section heading="Tenggat Mendekat"
@@ -153,7 +153,7 @@
             {{-- SECTION: Rekomendasi Untukmu (nested section) --}}
             <x-filament::section heading="Rekomendasi Untukmu"
                 description="Program pilihan yang cocok dengan minat & riwayat belajarmu."
-                class="mt-8 p-4 rounded-xl border border-gray-200 dark:border-gray-700">
+                style="margin-top:2rem; padding:1rem; border:1px solid #e5e7eb; border-radius:12px;">
                 @if (count($recommendations))
                     <ul role="list" class="flex flex-col gap-3">
                         @foreach ($recommendations as $p)
@@ -168,7 +168,8 @@
                                                 {{ $p->title }}
                                             </div>
 
-                                            <div class="mt-1 flex items-center gap-2 flex-wrap text-xs text-gray-500 dark:text-gray-400">
+                                            <div
+                                                class="mt-1 flex items-center gap-2 flex-wrap text-xs text-gray-500 dark:text-gray-400">
                                                 @if ($p->learningArea?->name)
                                                     <span
                                                         class="fi-badge fi-color-gray">{{ $p->learningArea->name }}</span>
@@ -195,7 +196,8 @@
                     </ul>
                 @else
                     <x-filament::card>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">Belum ada rekomendasi. Coba jelajahi program.</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">Belum ada rekomendasi. Coba jelajahi
+                            program.</div>
                     </x-filament::card>
                 @endif
             </x-filament::section>

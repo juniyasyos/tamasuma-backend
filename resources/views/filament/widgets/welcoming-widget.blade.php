@@ -74,14 +74,14 @@
                     <div class="rounded-xl border border-gray-200 dark:border-gray-700 p-4 h-full">
                         <div class="text-sm font-medium text-gray-700 dark:text-gray-200">Ringkasan</div>
                         <div class="mt-3 space-y-2">
-                            <div class="flex items-center justify-between gap-3">
+                            {{-- <div class="flex items-center justify-between gap-3">
                                 <div class="flex items-center gap-2 text-gray-600 dark:text-gray-300">
                                     <x-filament::icon icon="heroicon-o-bell" class="h-4 w-4" />
                                     <span>Notifikasi belum dibaca</span>
                                 </div>
                                 <span
                                     class="inline-flex items-center justify-center rounded-full px-2 py-0.5 text-xs font-semibold bg-warning-100 text-warning-800 dark:bg-warning-400/10 dark:text-warning-400">{{ $unreadNotificationsCount }}</span>
-                            </div>
+                            </div> --}}
                             <div class="flex items-center justify-between gap-3">
                                 <div class="flex items-center gap-2 text-gray-600 dark:text-gray-300">
                                     <x-filament::icon icon="heroicon-o-envelope-open" class="h-4 w-4" />
