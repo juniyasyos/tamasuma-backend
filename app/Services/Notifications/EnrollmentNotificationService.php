@@ -27,12 +27,19 @@ class EnrollmentNotificationService
 
             $notification = new ProgramEnrollmentRequested($enrollment);
 
+            $delivery = config('app-notifications.delivery', 'immediate');
+
             foreach ($recipients as $recipient) {
                 if ($recipient->id === $enrollment->user_id) {
                     continue; // do not notify the requester
                 }
-                // Force immediate database insert so Filament bell shows it even without a queue worker
-                $recipient->notifyNow($notification, ['database']);
+                if ($delivery === 'queued') {
+                    // Respect queue pipeline (requires worker running)
+                    $recipient->notify($notification);
+                } else {
+                    // Immediate database insert for shared hosting environments
+                    $recipient->notifyNow($notification, ['database']);
+                }
             }
         } catch (\Throwable $e) {
             Log::warning('Failed to notify enrollment request: '.$e->getMessage());
