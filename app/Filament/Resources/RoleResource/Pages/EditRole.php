@@ -52,7 +52,7 @@ class EditRole extends EditRecord
         $this->record->syncPermissions($permissionModels);
     }
 
-    protected function getBreadcrumbs(): array
+    public function getBreadcrumbs(): array
     {
         $title = \App\Filament\Support\Breadcrumbs::recordTitle($this->record);
         return [

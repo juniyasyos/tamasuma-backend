@@ -17,7 +17,7 @@ class ViewRole extends ViewRecord
         ];
     }
 
-    protected function getBreadcrumbs(): array
+    public function getBreadcrumbs(): array
     {
         $title = \App\Filament\Support\Breadcrumbs::recordTitle($this->record);
         return [

@@ -44,7 +44,7 @@ Tujuan: Menambahkan breadcrumbs yang konsisten di seluruh Resource dan Page (kec
 
 2) Resource Pages (List/Create/Edit/View)
 - Override breadcrumb minimalis sesuai Filament v3:
-  - `protected function getBreadcrumbs(): array` (Page turunan `ListRecords`, `CreateRecord`, `EditRecord`, `ViewRecord`).
+  - `public function getBreadcrumbs(): array` (Page turunan `ListRecords`, `CreateRecord`, `EditRecord`, `ViewRecord`).
   - Gunakan helper untuk mengisi label dan URL.
   - Untuk Edit/View: ambil judul record secara singkat (mis. 30 karakter, `Str::limit`).
 
@@ -63,7 +63,7 @@ Tujuan: Menambahkan breadcrumbs yang konsisten di seluruh Resource dan Page (kec
 ## Contoh Pola Kode (Ringkas)
 - Pada Edit Achievement (turunan `EditRecord`):
 ```php
-protected function getBreadcrumbs(): array
+public function getBreadcrumbs(): array
 {
     $dashboard = [__('Dashboard') => Breadcrumbs::panelDashboardUrl()];
     $index = [static::getResource()::getPluralLabel() => static::getResource()::getUrl('index')];
@@ -73,7 +73,7 @@ protected function getBreadcrumbs(): array
 ```
 - Pada MyAchievements (turunan `Page`):
 ```php
-protected function getBreadcrumbs(): array
+public function getBreadcrumbs(): array
 {
     return [__('Dashboard') => Breadcrumbs::panelDashboardUrl(), __('Pencapaian Saya') => null];
 }
