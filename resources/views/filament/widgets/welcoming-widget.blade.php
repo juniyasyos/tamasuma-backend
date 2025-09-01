@@ -3,10 +3,12 @@
         <div class="flex flex-col gap-4">
             <div class="flex items-center gap-4">
                 @if ($avatar)
-                    <img src="{{ $avatar }}" alt="Avatar" class="h-20 w-20 rounded-full ring-2 ring-primary-200 dark:ring-primary-900" />
+                    <img src="{{ $avatar }}" alt="Avatar"
+                        class="h-20 w-20 rounded-full ring-2 ring-primary-200 dark:ring-primary-900" />
                 @else
-                    <div class="h-20 w-20 rounded-full bg-primary-600/10 text-primary-600 grid place-items-center font-semibold">
-                        {{ str($user->name)->substr(0,1)->upper() }}
+                    <div
+                        class="h-20 w-20 rounded-full bg-primary-600/10 text-primary-600 dark:bg-primary-400/10 dark:text-primary-400 grid place-items-center font-semibold">
+                        {{ str($user->name)->substr(0, 1)->upper() }}
                     </div>
                 @endif
 
@@ -19,7 +21,8 @@
                     @if (!empty($roleNames))
                         <div class="mt-1 flex flex-wrap gap-2">
                             @foreach ($roleNames as $r)
-                                <x-filament::badge color="info" icon="heroicon-o-identification">{{ str($r)->headline() }}</x-filament::badge>
+                                <x-filament::badge color="info"
+                                    icon="heroicon-o-identification">{{ str($r)->headline() }}</x-filament::badge>
                             @endforeach
                         </div>
                     @endif
@@ -32,14 +35,17 @@
                         <div class="text-sm font-medium text-gray-700 dark:text-gray-200 mb-3">Aksi Cepat</div>
                         <div class="flex flex-wrap gap-2">
                             @foreach ($quickLinks as $link)
-                                <x-filament::button tag="a" href="{{ $link['url'] }}" icon="{{ $link['icon'] }}" color="{{ $link['color'] }}">
+                                <x-filament::button tag="a" href="{{ $link['url'] }}" icon="{{ $link['icon'] }}"
+                                    color="{{ $link['color'] }}">
                                     {{ $link['label'] }}
                                 </x-filament::button>
                             @endforeach
                         </div>
                         @if ($canTestNotifications)
-                            <div class="mt-4 border-t border-gray-200 dark:border-gray-700 pt-3" x-data="{ role: '{{ $roleOptions[0] ?? '' }}' }">
-                                <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">Testing Notifikasi</div>
+                            <div class="mt-4 border-t border-gray-200 dark:border-gray-700 pt-3"
+                                x-data="{ role: '{{ $roleOptions[0] ?? '' }}' }">
+                                <div class="text-sm font-medium text-gray-700 dark:text-gray-200 mb-3">Testing
+                                    Notifikasi</div>
                                 <div class="flex flex-wrap items-center gap-2">
                                     <x-filament::button color="gray" icon="heroicon-o-bell" wire:click="notifyAll">
                                         Kirim ke Semua Pengguna
@@ -51,7 +57,8 @@
                                             Kirim ke Role Terpilih
                                         </x-filament::button>
 
-                                        <select x-model="role" class="fi-input mt-0.5 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-sm">
+                                        <select x-model="role"
+                                            class="mt-0.5 text-sm rounded-md border border-gray-300 bg-white text-gray-900 focus:border-primary-600 focus:ring-2 focus:ring-primary-600/20 outline-none dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700 dark:focus:border-primary-500 dark:focus:ring-primary-500/30">
                                             @foreach ($roleOptions as $r)
                                                 <option value="{{ $r }}">{{ str($r)->headline() }}</option>
                                             @endforeach
@@ -72,7 +79,8 @@
                                     <x-filament::icon icon="heroicon-o-bell" class="h-4 w-4" />
                                     <span>Notifikasi belum dibaca</span>
                                 </div>
-                                <span class="inline-flex items-center justify-center rounded-full px-2 py-0.5 text-xs font-semibold bg-warning-100 text-warning-800 dark:bg-warning-400/10 dark:text-warning-400">{{ $unreadNotificationsCount }}</span>
+                                <span
+                                    class="inline-flex items-center justify-center rounded-full px-2 py-0.5 text-xs font-semibold bg-warning-100 text-warning-800 dark:bg-warning-400/10 dark:text-warning-400">{{ $unreadNotificationsCount }}</span>
                             </div>
                             <div class="flex items-center justify-between gap-3">
                                 <div class="flex items-center gap-2 text-gray-600 dark:text-gray-300">
@@ -80,9 +88,11 @@
                                     <span>Verifikasi email</span>
                                 </div>
                                 @if ($emailVerified)
-                                    <x-filament::badge color="success" icon="heroicon-o-check-circle">Terverifikasi</x-filament::badge>
+                                    <x-filament::badge color="success"
+                                        icon="heroicon-o-check-circle">Terverifikasi</x-filament::badge>
                                 @else
-                                    <x-filament::badge color="warning" icon="heroicon-o-exclamation-triangle">Belum</x-filament::badge>
+                                    <x-filament::badge color="warning"
+                                        icon="heroicon-o-exclamation-triangle">Belum</x-filament::badge>
                                 @endif
                             </div>
                             <div class="flex items-center justify-between gap-3">
@@ -91,9 +101,11 @@
                                     <span>Autentikasi 2 Langkah</span>
                                 </div>
                                 @if ($hasTwoFactor)
-                                    <x-filament::badge color="success" icon="heroicon-o-shield-check">Aktif</x-filament::badge>
+                                    <x-filament::badge color="success"
+                                        icon="heroicon-o-shield-check">Aktif</x-filament::badge>
                                 @else
-                                    <x-filament::badge color="gray" icon="heroicon-o-shield-exclamation">Nonaktif</x-filament::badge>
+                                    <x-filament::badge color="gray"
+                                        icon="heroicon-o-shield-exclamation">Nonaktif</x-filament::badge>
                                 @endif
                             </div>
                         </div>
@@ -103,7 +115,8 @@
 
             @if (!$emailVerified || !$hasTwoFactor)
                 <div class="rounded-xl bg-amber-50 dark:bg-amber-500/10 p-4 flex items-start gap-3">
-                    <x-filament::icon icon="heroicon-o-light-bulb" class="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5" />
+                    <x-filament::icon icon="heroicon-o-light-bulb"
+                        class="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5" />
                     <div class="text-sm text-amber-900 dark:text-amber-200">
                         <div class="font-semibold mb-0.5">Tips Keamanan</div>
                         <div>
@@ -118,7 +131,8 @@
                             @endif
                         </div>
                         <div class="mt-2">
-                            <x-filament::button tag="a" href="{{ url('my-profile') }}" size="sm" color="warning" icon="heroicon-o-shield-check">
+                            <x-filament::button tag="a" href="{{ url('my-profile') }}" size="sm"
+                                color="warning" icon="heroicon-o-shield-check">
                                 Buka Profil
                             </x-filament::button>
                         </div>

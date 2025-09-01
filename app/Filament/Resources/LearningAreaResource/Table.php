@@ -5,9 +5,6 @@ namespace App\Filament\Resources\LearningAreaResource;
 use App\Filament\Resources\LearningAreaResource;
 use Filament\Tables;
 use Filament\Tables\Columns\{TextColumn, IconColumn};
-use Filament\Tables\Columns\Layout\Panel;
-use Filament\Tables\Columns\Layout\Stack;
-use Filament\Tables\Columns\Layout\Grid as LayoutGrid;
 use Filament\Tables\Table as FilamentTable;
 
 class Table extends LearningAreaResource
@@ -21,50 +18,40 @@ class Table extends LearningAreaResource
             ->recordUrl(fn($record) => static::getUrl('edit', ['record' => $record]))
             ->searchPlaceholder('Cari nama/slug')
             ->persistSearchInSession()
-            // Atur setiap record sebagai kartu grid yang responsif
-            ->contentGrid([
-                'default' => 1,
-                'sm' => 1,
-                'md' => 2,
-                'lg' => 3,
-                'xl' => 4,
-            ])
             ->columns([
-                Panel::make([
-                    LayoutGrid::make(2)
-                        ->schema([
-                            Stack::make([
-                                TextColumn::make('name')
-                                    ->label('Nama')
-                                    ->weight('medium')
-                                    ->searchable()
-                                    ->sortable()
-                                    ->limit(40)
-                                    ->description(fn($record) => $record->slug),
-                            ])->columnSpan(2),
+                TextColumn::make('name')
+                    ->label('Nama')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('medium')
+                    ->limit(40)
+                    ->description(fn($record) => $record->slug),
 
-                            TextColumn::make('programs_count')
-                                ->label('Program')
-                                ->counts('programs')
-                                ->badge()
-                                ->sortable(),
+                TextColumn::make('slug')
+                    ->label('Slug')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->searchable(isIndividual: true),
 
-                            IconColumn::make('is_active')
-                                ->label('Aktif')
-                                ->boolean()
-                                ->trueIcon('heroicon-m-check-circle')
-                                ->falseIcon('heroicon-m-x-circle')
-                                ->trueColor('success')
-                                ->falseColor('gray')
-                                ->sortable(),
+                TextColumn::make('programs_count')
+                    ->label('Program')
+                    ->counts('programs')
+                    ->badge()
+                    ->sortable(),
 
-                            TextColumn::make('created_at')
-                                ->label('Dibuat')
-                                ->since()
-                                ->icon('heroicon-m-clock')
-                                ->sortable(),
-                        ]),
-                ])->collapsed(false),
+                IconColumn::make('is_active')
+                    ->label('Aktif')
+                    ->boolean()
+                    ->trueIcon('heroicon-m-check-circle')
+                    ->falseIcon('heroicon-m-x-circle')
+                    ->trueColor('success')
+                    ->falseColor('gray')
+                    ->sortable(),
+
+                TextColumn::make('created_at')
+                    ->label('Dibuat')
+                    ->since()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Tables\Filters\TernaryFilter::make('is_active')
@@ -78,8 +65,8 @@ class Table extends LearningAreaResource
                     ),
             ])
             ->actions([
-                Tables\Actions\EditAction::make()->color('warning')->iconButton(),
-                Tables\Actions\DeleteAction::make()->color('danger')->iconButton(),
+                Tables\Actions\EditAction::make()->iconButton(),
+                Tables\Actions\DeleteAction::make()->iconButton(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -93,3 +80,4 @@ class Table extends LearningAreaResource
             ]);
     }
 }
+

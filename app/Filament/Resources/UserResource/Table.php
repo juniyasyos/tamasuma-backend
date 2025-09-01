@@ -23,7 +23,6 @@ use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Columns\Layout\Stack;
-use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -39,20 +38,45 @@ class Table extends UserResource
     public static function make(FilamentTable $table): FilamentTable
     {
         return $table
-            ->recordUrl(null)
-            ->persistFiltersInSession()
-            ->persistSearchInSession()
-            ->contentGrid([
-                'default' => 1,
-                'sm' => 1,
-                'md' => 2,
-                'lg' => 2,
-                'xl' => 3,
-            ])
+            ->recordUrl(fn ($record) => static::getUrl('view', ['record' => $record]))
             ->columns([
-                ViewColumn::make('card')
-                    ->view('filament/users/user-card')
-                    ->extraAttributes(['class' => 'p-0'])
+                Split::make([
+                    ImageColumn::make('avatar_url')
+                        ->circular()
+                        ->grow(false)
+                        ->getStateUsing(
+                            fn (User $record) => $record->avatar_url ?: 'https://ui-avatars.com/api/?name='.urlencode($record->name)
+                        )
+                        ->extraImgAttributes(['loading' => 'lazy'])
+                        ->toggleable(false),
+
+                    TextColumn::make('name')
+                        ->weight(FontWeight::Bold)
+                        ->searchable()
+                        ->sortable(),
+
+                    Stack::make([
+                        TextColumn::make('email')
+                            ->icon('heroicon-m-envelope')
+                            ->searchable()
+                            ->copyable()
+                            ->copyMessage('Email disalin')
+                            ->copyMessageDuration(1500),
+
+                        TextColumn::make('roles.name')
+                            ->label('Roles')
+                            ->badge()
+                            ->color('info')
+                            ->separator(',')
+                            ->toggleable(isToggledHiddenByDefault: true),
+                    ])->alignStart()->space(1)->visibleFrom('md'),
+                ])->from('md'),
+
+                // Kolom ringkas untuk mobile
+                Stack::make([
+                    TextColumn::make('email')->icon('heroicon-m-envelope'),
+                    TextColumn::make('roles.name')->label('Roles')->badge()->color('info')->separator(','),
+                ])->visibleFrom('sm')->hiddenFrom('md'),
             ])
             ->defaultSort('name')
             ->filters([
