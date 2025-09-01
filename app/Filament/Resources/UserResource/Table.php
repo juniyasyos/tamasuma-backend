@@ -119,7 +119,7 @@ class Table extends UserResource
                         ]),
                 ])
                     ->collapsed()
-                    ->visibleUntil('md'),
+                    ->hiddenFrom('md'),
             ])
             ->defaultSort('name')
             ->filters([
