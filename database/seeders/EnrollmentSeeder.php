@@ -21,12 +21,13 @@ class EnrollmentSeeder extends Seeder
     {
         $today = Carbon::today();
 
-        $users = User::query()->orderBy('id')->get();
+        // Hanya user dengan role "Pelajar" yang diikutkan program
+        $users = User::role('Pelajar')->orderBy('id')->get();
         if ($users->isEmpty()) {
             return;
         }
 
-        $programs = Program::query()->orderBy('id')->get();
+        $programs = Program::query()->orderBy('id')->get();     
         if ($programs->isEmpty()) {
             return;
         }
@@ -101,4 +102,3 @@ class EnrollmentSeeder extends Seeder
         });
     }
 }
-
