@@ -31,11 +31,11 @@ class EnrollmentNotificationService
                 if ($recipient->id === $enrollment->user_id) {
                     continue; // do not notify the requester
                 }
-                $recipient->notify($notification);
+                // Force immediate database insert so Filament bell shows it even without a queue worker
+                $recipient->notifyNow($notification, ['database']);
             }
         } catch (\Throwable $e) {
             Log::warning('Failed to notify enrollment request: '.$e->getMessage());
         }
     }
 }
-
