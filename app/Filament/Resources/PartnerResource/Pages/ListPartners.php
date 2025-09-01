@@ -22,6 +22,7 @@ class ListPartners extends ListRecords
         return [
             __('Dashboard') => \App\Filament\Support\Breadcrumbs::panelDashboardUrl(),
             PartnerResource::getPluralModelLabel() => PartnerResource::getUrl('index'),
+            __('List') => null,
         ];
     }
 }

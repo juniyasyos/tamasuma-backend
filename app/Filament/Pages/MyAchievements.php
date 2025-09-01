@@ -44,6 +44,7 @@ class MyAchievements extends Page implements Tables\Contracts\HasTable
     {
         return [
             __('Dashboard') => \App\Filament\Support\Breadcrumbs::panelDashboardUrl(),
+            \App\Filament\Resources\AchievementResource::getPluralModelLabel() => \App\Filament\Resources\AchievementResource::getUrl('index'),
             __('Pencapaian Saya') => null,
         ];
     }

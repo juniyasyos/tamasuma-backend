@@ -22,6 +22,7 @@ class ListAchievements extends ListRecords
         return [
             __('Dashboard') => \App\Filament\Support\Breadcrumbs::panelDashboardUrl(),
             AchievementResource::getPluralModelLabel() => AchievementResource::getUrl('index'),
+            __('List') => null,
         ];
     }
 }

@@ -22,6 +22,7 @@ class ListRoles extends ListRecords
         return [
             __('Dashboard') => \App\Filament\Support\Breadcrumbs::panelDashboardUrl(),
             RoleResource::getPluralModelLabel() => RoleResource::getUrl('index'),
+            __('List') => null,
         ];
     }
 }

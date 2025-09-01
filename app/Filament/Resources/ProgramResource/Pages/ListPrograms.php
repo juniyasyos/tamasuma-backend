@@ -22,6 +22,7 @@ class ListPrograms extends ListRecords
         return [
             __('Dashboard') => \App\Filament\Support\Breadcrumbs::panelDashboardUrl(),
             ProgramResource::getPluralModelLabel() => ProgramResource::getUrl('index'),
+            __('List') => null,
         ];
     }
 }

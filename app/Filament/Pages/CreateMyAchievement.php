@@ -39,6 +39,7 @@ class CreateMyAchievement extends Page implements HasForms
     {
         return [
             __('Dashboard') => \App\Filament\Support\Breadcrumbs::panelDashboardUrl(),
+            \App\Filament\Resources\AchievementResource::getPluralModelLabel() => \App\Filament\Resources\AchievementResource::getUrl('index'),
             __('Pencapaian Saya') => \App\Filament\Pages\MyAchievements::getUrl(),
             __('Tambah') => null,
         ];

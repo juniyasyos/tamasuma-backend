@@ -22,6 +22,7 @@ class ListLearningAreas extends ListRecords
         return [
             __('Dashboard') => \App\Filament\Support\Breadcrumbs::panelDashboardUrl(),
             LearningAreaResource::getPluralModelLabel() => LearningAreaResource::getUrl('index'),
+            __('List') => null,
         ];
     }
 }

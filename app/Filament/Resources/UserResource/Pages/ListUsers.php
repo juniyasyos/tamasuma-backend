@@ -36,6 +36,7 @@ class ListUsers extends ListRecords
         return [
             __('Dashboard') => \App\Filament\Support\Breadcrumbs::panelDashboardUrl(),
             UserResource::getPluralModelLabel() => UserResource::getUrl('index'),
+            __('List') => null,
         ];
     }
 }
