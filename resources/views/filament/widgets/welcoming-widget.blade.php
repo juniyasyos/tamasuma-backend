@@ -38,7 +38,7 @@
                             @endforeach
                         </div>
                         @if ($canTestNotifications)
-                            <div class="mt-4 border-t border-gray-200 dark:border-gray-700 pt-3">
+                            <div class="mt-4 border-t border-gray-200 dark:border-gray-700 pt-3" x-data="{ role: '{{ $roleOptions[0] ?? '' }}' }">
                                 <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">Testing Notifikasi</div>
                                 <div class="flex flex-wrap items-center gap-2">
                                     <x-filament::button color="gray" icon="heroicon-o-bell" wire:click="notifyAll">
@@ -47,14 +47,13 @@
 
                                     @if (!empty($roleOptions))
                                         <x-filament::button color="info" icon="heroicon-o-bell-alert"
-                                            x-data="{ role: '{{ $roleOptions[0] ?? '' }}' }"
                                             x-on:click="$wire.notifyRole(role)">
                                             Kirim ke Role Terpilih
                                         </x-filament::button>
 
-                                        <select x-data x-model="role" class="fi-input mt-0.5 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-sm">
+                                        <select x-model="role" class="fi-input mt-0.5 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-sm">
                                             @foreach ($roleOptions as $r)
-                                                <option value="{{ $r }}">{{ Str::headline($r) }}</option>
+                                                <option value="{{ $r }}">{{ str($r)->headline() }}</option>
                                             @endforeach
                                         </select>
                                     @endif
