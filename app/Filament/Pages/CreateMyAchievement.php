@@ -35,6 +35,15 @@ class CreateMyAchievement extends Page implements HasForms
         return Auth::check();
     }
 
+    protected function getBreadcrumbs(): array
+    {
+        return [
+            __('Dashboard') => \App\Filament\Support\Breadcrumbs::panelDashboardUrl(),
+            __('Pencapaian Saya') => \App\Filament\Pages\MyAchievements::getUrl(),
+            __('Tambah') => null,
+        ];
+    }
+
     public function mount(): void
     {
         $this->form->fill();
@@ -79,7 +88,7 @@ class CreateMyAchievement extends Page implements HasForms
                         ->columnSpanFull(),
 
                     Forms\Components\Select::make('tags')->label('Tag')
-                        ->multiple()->tags()->placeholder('Tambahkan tag')
+                        ->multiple()->placeholder('Tambahkan tag')
                         ->columnSpanFull(),
 
                     Forms\Components\ToggleButtons::make('visibility')
@@ -112,4 +121,3 @@ class CreateMyAchievement extends Page implements HasForms
         $this->redirect(\App\Filament\Pages\MyAchievements::getUrl());
     }
 }
-

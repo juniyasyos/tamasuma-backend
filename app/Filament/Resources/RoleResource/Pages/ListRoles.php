@@ -16,4 +16,12 @@ class ListRoles extends ListRecords
             Actions\CreateAction::make(),
         ];
     }
+
+    protected function getBreadcrumbs(): array
+    {
+        return [
+            __('Dashboard') => \App\Filament\Support\Breadcrumbs::panelDashboardUrl(),
+            RoleResource::getPluralModelLabel() => RoleResource::getUrl('index'),
+        ];
+    }
 }

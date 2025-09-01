@@ -85,5 +85,15 @@ class ViewProgram extends ViewRecord
         ];
     }
 
+    protected function getBreadcrumbs(): array
+    {
+        $title = \App\Filament\Support\Breadcrumbs::recordTitle($this->record);
+        return [
+            __('Dashboard') => \App\Filament\Support\Breadcrumbs::panelDashboardUrl(),
+            ProgramResource::getPluralModelLabel() => ProgramResource::getUrl('index'),
+            $title => null,
+        ];
+    }
+
     // Remove custom infolist to use ProgramResource::infolist (which uses tabs)
 }

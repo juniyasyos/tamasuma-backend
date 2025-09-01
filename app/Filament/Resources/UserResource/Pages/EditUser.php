@@ -27,5 +27,15 @@ class EditUser extends EditRecord
         return $this->getResource()::getUrl('index');
     }
 
+    protected function getBreadcrumbs(): array
+    {
+        $title = \App\Filament\Support\Breadcrumbs::recordTitle($this->record);
+        return [
+            __('Dashboard') => \App\Filament\Support\Breadcrumbs::panelDashboardUrl(),
+            UserResource::getPluralModelLabel() => UserResource::getUrl('index'),
+            __('Ubah') . ': ' . $title => null,
+        ];
+    }
+
     // No custom sync needed; Repeater uses hasMany relationship directly.
 }

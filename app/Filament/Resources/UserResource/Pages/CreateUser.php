@@ -16,4 +16,13 @@ class CreateUser extends CreateRecord
     {
         return $this->getResource()::getUrl('index');
     }
+
+    protected function getBreadcrumbs(): array
+    {
+        return [
+            __('Dashboard') => \App\Filament\Support\Breadcrumbs::panelDashboardUrl(),
+            UserResource::getPluralModelLabel() => UserResource::getUrl('index'),
+            __('Tambah') => null,
+        ];
+    }
 }

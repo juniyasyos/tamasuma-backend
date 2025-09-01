@@ -16,4 +16,12 @@ class ListPartners extends ListRecords
             Actions\CreateAction::make(),
         ];
     }
+
+    protected function getBreadcrumbs(): array
+    {
+        return [
+            __('Dashboard') => \App\Filament\Support\Breadcrumbs::panelDashboardUrl(),
+            PartnerResource::getPluralModelLabel() => PartnerResource::getUrl('index'),
+        ];
+    }
 }

@@ -21,4 +21,14 @@ class EditLearningArea extends EditRecord
     {
         return $this->getResource()::getUrl('index');
     }
+
+    protected function getBreadcrumbs(): array
+    {
+        $title = \App\Filament\Support\Breadcrumbs::recordTitle($this->record);
+        return [
+            __('Dashboard') => \App\Filament\Support\Breadcrumbs::panelDashboardUrl(),
+            LearningAreaResource::getPluralModelLabel() => LearningAreaResource::getUrl('index'),
+            __('Ubah') . ': ' . $title => null,
+        ];
+    }
 }

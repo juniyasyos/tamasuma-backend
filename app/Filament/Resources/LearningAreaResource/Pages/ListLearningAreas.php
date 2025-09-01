@@ -16,4 +16,12 @@ class ListLearningAreas extends ListRecords
             Actions\CreateAction::make(),
         ];
     }
+
+    protected function getBreadcrumbs(): array
+    {
+        return [
+            __('Dashboard') => \App\Filament\Support\Breadcrumbs::panelDashboardUrl(),
+            LearningAreaResource::getPluralModelLabel() => LearningAreaResource::getUrl('index'),
+        ];
+    }
 }

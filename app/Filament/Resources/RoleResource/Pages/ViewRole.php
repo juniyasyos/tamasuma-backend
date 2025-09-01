@@ -16,4 +16,14 @@ class ViewRole extends ViewRecord
             Actions\EditAction::make(),
         ];
     }
+
+    protected function getBreadcrumbs(): array
+    {
+        $title = \App\Filament\Support\Breadcrumbs::recordTitle($this->record);
+        return [
+            __('Dashboard') => \App\Filament\Support\Breadcrumbs::panelDashboardUrl(),
+            RoleResource::getPluralModelLabel() => RoleResource::getUrl('index'),
+            $title => null,
+        ];
+    }
 }

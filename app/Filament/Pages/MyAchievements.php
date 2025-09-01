@@ -40,6 +40,14 @@ class MyAchievements extends Page implements Tables\Contracts\HasTable
         return Auth::check();
     }
 
+    protected function getBreadcrumbs(): array
+    {
+        return [
+            __('Dashboard') => \App\Filament\Support\Breadcrumbs::panelDashboardUrl(),
+            __('Pencapaian Saya') => null,
+        ];
+    }
+
     public function table(Table $table): Table
     {
         return $table

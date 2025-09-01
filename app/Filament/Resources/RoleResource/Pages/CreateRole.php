@@ -44,4 +44,13 @@ class CreateRole extends CreateRecord
 
         $this->record->syncPermissions($permissionModels);
     }
+
+    protected function getBreadcrumbs(): array
+    {
+        return [
+            __('Dashboard') => \App\Filament\Support\Breadcrumbs::panelDashboardUrl(),
+            RoleResource::getPluralModelLabel() => RoleResource::getUrl('index'),
+            __('Tambah') => null,
+        ];
+    }
 }

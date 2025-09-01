@@ -30,4 +30,12 @@ class ListUsers extends ListRecords
                 ]),
         ];
     }
+
+    protected function getBreadcrumbs(): array
+    {
+        return [
+            __('Dashboard') => \App\Filament\Support\Breadcrumbs::panelDashboardUrl(),
+            UserResource::getPluralModelLabel() => UserResource::getUrl('index'),
+        ];
+    }
 }

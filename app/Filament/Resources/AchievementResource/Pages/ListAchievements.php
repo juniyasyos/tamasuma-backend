@@ -16,5 +16,12 @@ class ListAchievements extends ListRecords
             Actions\CreateAction::make(),
         ];
     }
-}
 
+    protected function getBreadcrumbs(): array
+    {
+        return [
+            __('Dashboard') => \App\Filament\Support\Breadcrumbs::panelDashboardUrl(),
+            AchievementResource::getPluralModelLabel() => AchievementResource::getUrl('index'),
+        ];
+    }
+}

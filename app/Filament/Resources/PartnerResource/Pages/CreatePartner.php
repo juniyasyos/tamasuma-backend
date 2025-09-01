@@ -15,4 +15,13 @@ class CreatePartner extends CreateRecord
     {
         return $this->getResource()::getUrl('index');
     }
+
+    protected function getBreadcrumbs(): array
+    {
+        return [
+            __('Dashboard') => \App\Filament\Support\Breadcrumbs::panelDashboardUrl(),
+            PartnerResource::getPluralModelLabel() => PartnerResource::getUrl('index'),
+            __('Tambah') => null,
+        ];
+    }
 }

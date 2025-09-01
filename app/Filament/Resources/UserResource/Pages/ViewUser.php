@@ -30,4 +30,14 @@ class ViewUser extends ViewRecord
             Impersonate::make()->record($this->getRecord()),
         ];
     }
+
+    protected function getBreadcrumbs(): array
+    {
+        $title = \App\Filament\Support\Breadcrumbs::recordTitle($this->record);
+        return [
+            __('Dashboard') => \App\Filament\Support\Breadcrumbs::panelDashboardUrl(),
+            UserResource::getPluralModelLabel() => UserResource::getUrl('index'),
+            $title => null,
+        ];
+    }
 }
