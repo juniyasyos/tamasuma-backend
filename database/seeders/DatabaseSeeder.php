@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
                 PartnerSeeder::class,
                 ShieldSeeder::class,
                 UsersWithRolesSeeder::class,
+                EnrollmentSeeder::class,
             ]
         );
     }
