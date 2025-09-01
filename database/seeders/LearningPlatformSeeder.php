@@ -9,6 +9,7 @@ use App\Models\Material;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class LearningPlatformSeeder extends Seeder
 {
@@ -84,6 +85,8 @@ class LearningPlatformSeeder extends Seeder
 
     public function run(): void
     {
+        $allPrograms = [];
+
         foreach ($this->catalog as $areaName => $programs) {
             DB::transaction(function () use ($areaName, $programs) {
                 // === LEARNING AREA ===
@@ -126,12 +129,28 @@ class LearningPlatformSeeder extends Seeder
                     // if ($p['source'] === 'internal') {
                     //     $this->seedUnitsAndMaterials($program);
                     // }
+
+                    // Kumpulkan id program untuk penjadwalan terpusat setelah semua area selesai diproses
+                    $this->programBuffer[] = $program->id;
                 }
             });
 
             if (isset($this->command)) {
                 $this->command->info("✓ Seeded area: {$areaName}");
             }
+        }
+
+        // Ambil kembali instance program dari buffer untuk dijadwalkan
+        if (! empty($this->programBuffer)) {
+            $allPrograms = Program::whereIn('id', $this->programBuffer)
+                ->orderBy('id')
+                ->get()
+                ->all();
+        }
+
+        // Tetapkan jadwal realistis: mulai bulan lalu, max 3 program per minggu, masa depan maks 1 bulan
+        if (! empty($allPrograms)) {
+            $this->assignSchedules($allPrograms);
         }
     }
 
@@ -189,5 +208,76 @@ class LearningPlatformSeeder extends Seeder
         }
 
         return $slug;
+    }
+
+    // Buffer id program untuk penjadwalan global (menghindari referensi di dalam transaksi)
+    protected array $programBuffer = [];
+
+    /**
+     * Menetapkan jadwal untuk deretan program dengan batasan:
+     * - Mulai dari awal bulan lalu (diselaraskan ke Senin)
+     * - Maksimal 3 program per minggu (Senin, Rabu, Jumat)
+     * - Tanggal masa depan dibatasi sampai 1 bulan dari hari ini
+     * - Durasi deterministik 3-8 hari agar beragam (bukan acak)
+     */
+    protected function assignSchedules(array $programs): void
+    {
+        if (empty($programs)) {
+            return;
+        }
+
+        $now = Carbon::now();
+        $futureCap = $now->copy()->addMonth()->endOfDay();
+
+        // Rentang minggu: dari awal bulan lalu hingga akhir minggu pada bulan depan
+        $periodStart = $now->copy()->subMonth()->startOfMonth()->startOfWeek(Carbon::MONDAY);
+        $periodEnd   = $now->copy()->addMonth()->endOfWeek(Carbon::SUNDAY);
+
+        // Buat slot per minggu: Senin, Rabu, Jumat
+        $weekStarts = [];
+        for ($cursor = $periodStart->copy(); $cursor->lte($periodEnd); $cursor->addWeek()) {
+            $weekStarts[] = $cursor->copy();
+        }
+
+        $slots = [];
+        foreach ($weekStarts as $ws) {
+            $slots[] = $ws->copy();              // Senin
+            $slots[] = $ws->copy()->addDays(2);  // Rabu
+            $slots[] = $ws->copy()->addDays(4);  // Jumat
+        }
+
+        // Batasi jumlah program sesuai jumlah slot yang tersedia
+        $count = min(count($programs), count($slots));
+
+        // Pola durasi deterministik agar stabil antar seed
+        $durations = [3, 5, 4, 6, 7, 8];
+
+        for ($i = 0; $i < $count; $i++) {
+            /** @var \App\Models\Program $program */
+            $program = $programs[$i];
+            $start   = $slots[$i]->copy()->startOfDay();
+
+            // Pastikan tanggal mulai tidak melewati batas masa depan
+            if ($start->gt($futureCap)) {
+                $start = $futureCap->copy()->startOfDay();
+            }
+
+            $durationDays = $durations[$i % count($durations)];
+            $end = $start->copy()->addDays($durationDays)->endOfDay();
+
+            // Klip tanggal selesai agar tidak lebih dari batas masa depan
+            if ($end->gt($futureCap)) {
+                $end = $futureCap->copy();
+            }
+
+            // Pastikan ends_at selalu >= starts_at
+            if ($end->lt($start)) {
+                $end = $start->copy()->endOfDay();
+            }
+
+            $program->starts_at = $start->toDateString();
+            $program->ends_at   = $end->toDateString();
+            $program->save();
+        }
     }
 }
