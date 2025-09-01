@@ -9,6 +9,8 @@ class RecentAchievementsWidget extends Widget
 {
     protected static string $view = 'filament.widgets.recent-achievements-widget';
 
+    protected int|string|array $columnSpan = 'full';
+
     public static function canView(): bool
     {
         return Auth::check();
@@ -23,4 +25,3 @@ class RecentAchievementsWidget extends Widget
         ];
     }
 }
-

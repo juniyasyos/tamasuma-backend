@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\AchievementResource\Pages;
 use App\Models\Achievement;
+use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -11,6 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ImageColumn;
+use Illuminate\Support\Facades\Auth;
 
 class AchievementResource extends Resource
 {
@@ -20,11 +22,29 @@ class AchievementResource extends Resource
     protected static ?string $navigationGroup = 'Content Management';
     protected static ?string $navigationLabel = 'Pencapaian';
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        $u = Auth::user();
+        if (! $u) return false;
+        // Only Admin & Super Admin (or explicit permission) see this in navigation
+        $isAdmin = method_exists($u, 'hasRole') && ($u->hasRole('super_admin') || $u->hasRole('Admin'));
+        return $isAdmin || $u->can('view_any_achievement');
+    }
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\Grid::make(2)->schema([
+                    Forms\Components\Select::make('user_id')
+                        ->label('Pengguna')
+                        ->relationship('user', 'name')
+                        ->searchable()
+                        ->preload()
+                        ->required()
+                        ->native(false)
+                        ->visible(fn() => ($u = Auth::user()) && method_exists($u, 'hasRole') && ($u->hasRole('super_admin') || $u->hasRole('Admin'))),
+
                     Forms\Components\TextInput::make('title')->label('Judul')->required()->maxLength(150),
                     Forms\Components\Select::make('category')->label('Kategori')->options([
                         'certificate' => 'Sertifikat',
@@ -83,6 +103,8 @@ class AchievementResource extends Resource
             ])
             ->columns([
                 ImageColumn::make('proof_image')->disk('public')->circular()->grow(false),
+                TextColumn::make('user.name')->label('Pengguna')
+                    ->visible(fn() => ($u = Auth::user()) && method_exists($u, 'hasRole') && ($u->hasRole('super_admin') || $u->hasRole('Admin'))),
                 TextColumn::make('title')->label('Judul')->wrap()->searchable()->sortable(),
                 TextColumn::make('category')->badge()->color('info')->sortable(),
                 TextColumn::make('issuer')->label('Penyelenggara')->toggleable(),
