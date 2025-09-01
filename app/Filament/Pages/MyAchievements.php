@@ -55,16 +55,11 @@ class MyAchievements extends Page implements Tables\Contracts\HasTable
                 }),
             ])
             ->headerActions([
-                CreateAction::make()
+                Tables\Actions\Action::make('go_to_create')
                     ->label('Tambah Pencapaian')
-                    ->modalHeading('Tambah Pencapaian')
-                    ->form($this->formSchema())
-                    ->using(function (array $data): Achievement {
-                        $userId = Auth::id();
-                        $data['user_id'] = $userId;
-                        // created_via & created_by_id diisi otomatis oleh model boot() ketika actor == owner
-                        return Achievement::create($data);
-                    }),
+                    ->icon('heroicon-o-plus-circle')
+                    ->url(fn () => \App\Filament\Pages\CreateMyAchievement::getUrl())
+                    ->openUrlInNewTab(false),
             ])
             ->actions([
                 EditAction::make()
@@ -117,7 +112,7 @@ class MyAchievements extends Page implements Tables\Contracts\HasTable
                     ->columnSpanFull(),
 
                 Forms\Components\Select::make('tags')->label('Tag')
-                    ->multiple()->tags()->placeholder('Tambahkan tag')->columnSpanFull(),
+                    ->multiple()->placeholder('Tambahkan tag')->columnSpanFull(),
 
                 Forms\Components\ToggleButtons::make('visibility')
                     ->label('Keterlihatan')
@@ -136,4 +131,3 @@ class MyAchievements extends Page implements Tables\Contracts\HasTable
         ];
     }
 }
-

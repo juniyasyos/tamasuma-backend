@@ -58,6 +58,13 @@ Tujuan: meningkatkan produktivitas admin/super_admin mengelola Achievement linta
    - `FileUpload::make('proof_image')` terima PDF + gambar, preview tinggi 150, downloadable/openable.
    - `ToggleButtons::make('visibility')` dengan ikon (eye/lock/link).
 
+3) My Achievements (Pelajar) — Alur Create
+- Alih‑alih modal Create di halaman tabel, tombol “Tambah Pencapaian” mengarah ke halaman form terpisah:
+  - Page: `App\Filament\Pages\CreateMyAchievement` (hidden dari navigasi, akses melalui tombol dari `MyAchievements`).
+  - Form: sama seperti form pelajar sebelumnya, tanpa field `user_id` (otomatis `Auth::id()`).
+  - Submit: membuat record dan redirect kembali ke `MyAchievements` dengan notifikasi sukses.
+- Hal ini meningkatkan UX untuk form panjang (upload + deskripsi) dan mengurangi rasa “sempit” di modal.
+
 3) Kualitas & Akses
    - Pastikan kolom/aksi admin-only tetap dibungkus guard pengguna.
    - Pertahankan kebijakan policy (pelajar tidak dapat mengedit non-self).
@@ -72,9 +79,9 @@ Tujuan: meningkatkan produktivitas admin/super_admin mengelola Achievement linta
   - Toggle featured langsung dari tabel.
   - Ubah visibility per-row dan bulk.
   - Export data terpilih ke Excel/CSV.
-  - Form lebih terstruktur via tabs.
+- Form lebih terstruktur via tabs.
 - Tanpa migrasi baru; kompatibel dengan data saat ini.
+- Untuk Pelajar: tombol “Tambah Pencapaian” membuka halaman khusus Create (bukan modal), lalu kembali ke daftar setelah berhasil.
 
 ## Permintaan Persetujuan
 - Jika disetujui, saya akan refactor `app/Filament/Resources/AchievementResource.php` sesuai rencana di atas dalam satu commit terfokus, tanpa mengubah resource lain.
-
