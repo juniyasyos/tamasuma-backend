@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Filament\Notifications\Notification;
 use App\Models\Enrollment;
+use Carbon\Carbon;
 
     class Table extends ProgramResource
     {
@@ -87,6 +88,38 @@ use App\Models\Enrollment;
                         default     => 'gray',
                     }),
 
+                // Status program dengan badge (Selesai / Berjalan / Belum Dimulai / Tidak Dijadwalkan)
+                TextColumn::make('status_badge')
+                    ->label('Status')
+                    ->badge()
+                    ->color(function (Program $record): string {
+                        $now = Carbon::now();
+                        if ($record->ends_at && $record->ends_at->lt($now->copy()->startOfDay())) {
+                            return 'success'; // Selesai
+                        }
+                        if ($record->starts_at && $record->starts_at->gt($now)) {
+                            return 'gray'; // Belum Dimulai
+                        }
+                        if ($record->starts_at && (! $record->ends_at || $record->ends_at->gte($now))) {
+                            return 'warning'; // Berjalan
+                        }
+                        return 'gray'; // Tidak Dijadwalkan
+                    })
+                    ->state(function (Program $record): string {
+                        $now = Carbon::now();
+                        if ($record->ends_at && $record->ends_at->lt($now->copy()->startOfDay())) {
+                            return 'Selesai';
+                        }
+                        if ($record->starts_at && $record->starts_at->gt($now)) {
+                            return 'Belum Dimulai';
+                        }
+                        if ($record->starts_at && (! $record->ends_at || $record->ends_at->gte($now))) {
+                            return 'Berjalan';
+                        }
+                        return 'Tidak Dijadwalkan';
+                    })
+                    ->sortable(false),
+
                 TextColumn::make('platform')
                     ->label('Platform')
                     ->placeholder('-')
@@ -140,16 +173,24 @@ use App\Models\Enrollment;
                         || Auth::user()?->can('update_any_program')
                     )),
 
-                TextColumn::make('starts_at')
-                    ->label('Mulai')
-                    ->date('d M Y')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-
-                TextColumn::make('ends_at')
-                    ->label('Selesai')
-                    ->date('d M Y')
-                    ->sortable()
+                // Kolom jadwal gabungan (Mulai – Selesai)
+                TextColumn::make('schedule')
+                    ->label('Jadwal')
+                    ->state(function (Program $record): string {
+                        $fmt = fn($d) => $d ? Carbon::parse($d)->translatedFormat('d M Y') : null;
+                        $start = $fmt($record->starts_at);
+                        $end   = $fmt($record->ends_at);
+                        if ($start && $end) {
+                            return $start . ' – ' . $end;
+                        }
+                        if ($start && ! $end) {
+                            return $start . ' – ?';
+                        }
+                        if (! $start && $end) {
+                            return '? – ' . $end;
+                        }
+                        return '-';
+                    })
                     ->toggleable(isToggledHiddenByDefault: false),
             ])
             ->defaultSort('created_at', 'desc')
@@ -207,6 +248,25 @@ use App\Models\Enrollment;
                     ->placeholder('Semua')
                     ->trueLabel('Dengan Sertifikat')
                     ->falseLabel('Tanpa Sertifikat'),
+
+                // Filter status selesai vs belum (tanpa pilih tanggal)
+                TernaryFilter::make('is_finished')
+                    ->label('Selesai?')
+                    ->placeholder('Semua')
+                    ->trueLabel('Selesai')
+                    ->falseLabel('Belum / Berjalan')
+                    ->queries(
+                        true: fn (Builder $query): Builder => $query->whereNotNull('ends_at')->whereDate('ends_at', '<', Carbon::today()),
+                        false: fn (Builder $query): Builder => $query->where(function (Builder $q) {
+                            $q->whereNull('ends_at')->orWhereDate('ends_at', '>=', Carbon::today());
+                        }),
+                        blank: fn (Builder $query): Builder => $query,
+                    )
+                    ->indicateUsing(fn ($state) => match ($state) {
+                        true  => 'Selesai',
+                        false => 'Belum / Berjalan',
+                        default => null,
+                    }),
 
                 // Filter::make('created_at')
                 //     ->label('Rentang Tanggal')

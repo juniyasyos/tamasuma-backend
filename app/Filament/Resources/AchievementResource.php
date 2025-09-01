@@ -19,6 +19,7 @@ class AchievementResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-trophy';
     protected static ?string $navigationGroup = 'Content Management';
     protected static ?string $navigationLabel = 'Pencapaian';
+    protected static ?int $navigationSort = 10;
 
     public static function shouldRegisterNavigation(): bool
     {
