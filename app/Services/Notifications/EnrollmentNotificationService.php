@@ -11,18 +11,30 @@ use Illuminate\Support\Facades\Schema;
 class EnrollmentNotificationService
 {
     /**
-     * Notify only Admin and Super Admin when a student requests enrollment.
+     * Notify recipients when a student requests enrollment.
+     * Recipients resolved via permissions (Gate) with optional role fallback.
      */
     public function notifyRequested(Enrollment $enrollment): void
     {
         try {
-            $query = User::query()->role(['Admin', 'super_admin']);
+            $perms = (array) config('app-notifications.recipients.enrollment_requested_permissions', []);
+            $fallbackRoles = array_filter((array) config('app-notifications.recipients.enrollment_requested_roles', []));
 
-            if (Schema::hasColumn('users', 'mute_program_enrollment_notifications')) {
-                $query->where('mute_program_enrollment_notifications', false);
+            $byPermission = collect();
+            if (! empty($perms)) {
+                $byPermission = User::permission($perms)->get();
             }
 
-            $recipients = $query->get();
+            $byRole = collect();
+            if (! empty($fallbackRoles)) {
+                $byRole = User::role($fallbackRoles)->get();
+            }
+
+            $recipients = $byPermission->merge($byRole)->unique('id');
+
+            if (Schema::hasColumn('users', 'mute_program_enrollment_notifications')) {
+                $recipients = $recipients->where('mute_program_enrollment_notifications', false);
+            }
             if ($recipients->isEmpty()) return;
 
             $notification = new ProgramEnrollmentRequested($enrollment);
