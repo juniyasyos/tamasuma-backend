@@ -93,22 +93,28 @@ class Table extends Resource
                     ->label('Pemilik')
                     ->relationship('user', 'name')
                     ->visible(fn() => ($u = Auth::user()) && method_exists($u, 'hasRole') && ($u->hasRole('super_admin') || $u->hasRole('Admin'))),
-                Tables\Filters\Filter::make('date_range')->form([
-                    Forms\Components\DatePicker::make('from')->label('Dari')->native(false),
-                    Forms\Components\DatePicker::make('until')->label('Sampai')->native(false),
-                ])->query(function($q, $data){
-                    return $q
-                        ->when(($data['from'] ?? null), fn($qq,$d)=>$qq->whereDate('achieved_at','>=',$d))
-                        ->when(($data['until'] ?? null), fn($qq,$d)=>$qq->whereDate('achieved_at','<=',$d));
-                }),
+                Tables\Filters\Filter::make('date_range')
+                    ->form([
+                        Forms\Components\DatePicker::make('from')->label('Dari')->native(false),
+                        Forms\Components\DatePicker::make('until')->label('Sampai')->native(false),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        if (!empty($data['from'])) {
+                            $query->whereDate('achieved_at', '>=', $data['from']);
+                        }
+                        if (!empty($data['until'])) {
+                            $query->whereDate('achieved_at', '<=', $data['until']);
+                        }
+                        return $query;
+                    }),
                 Tables\Filters\Filter::make('tag')->form([
                     Forms\Components\TextInput::make('tag')->label('Tag'),
-                ])->query(function ($q, $data) {
+                ])->query(function (Builder $query, array $data) {
                     $tag = trim((string) ($data['tag'] ?? ''));
                     if ($tag !== '') {
-                        $q->whereJsonContains('tags', $tag);
+                        $query->whereJsonContains('tags', $tag);
                     }
-                    return $q;
+                    return $query;
                 }),
             ])
             ->actions([
@@ -139,7 +145,7 @@ class Table extends Resource
             ])
             ->bulkActions([
                 BulkActionGroup::make([
-                    ExportBulkAction::make(),
+                    // ExportBulkAction::make(),
                     BulkAction::make('bulk_set_visibility')
                         ->label('Atur Visibilitas')
                         ->icon('heroicon-m-eye')
@@ -183,4 +189,3 @@ class Table extends Resource
             ]);
     }
 }
-

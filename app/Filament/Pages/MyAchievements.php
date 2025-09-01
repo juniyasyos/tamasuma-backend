@@ -40,7 +40,7 @@ class MyAchievements extends Page implements Tables\Contracts\HasTable
         return Auth::check();
     }
 
-    protected function getBreadcrumbs(): array
+    public function getBreadcrumbs(): array
     {
         return [
             __('Dashboard') => \App\Filament\Support\Breadcrumbs::panelDashboardUrl(),

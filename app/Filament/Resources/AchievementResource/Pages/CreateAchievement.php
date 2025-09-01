@@ -9,7 +9,7 @@ class CreateAchievement extends CreateRecord
 {
     protected static string $resource = AchievementResource::class;
 
-    protected function getBreadcrumbs(): array
+    public function getBreadcrumbs(): array
     {
         return [
             __('Dashboard') => \App\Filament\Support\Breadcrumbs::panelDashboardUrl(),

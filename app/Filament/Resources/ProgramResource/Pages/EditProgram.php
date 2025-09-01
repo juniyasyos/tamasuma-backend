@@ -22,7 +22,7 @@ class EditProgram extends EditRecord
         return $this->getResource()::getUrl('index');
     }
 
-    protected function getBreadcrumbs(): array
+    public function getBreadcrumbs(): array
     {
         $title = \App\Filament\Support\Breadcrumbs::recordTitle($this->record);
         return [

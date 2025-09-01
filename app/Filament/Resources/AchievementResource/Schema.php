@@ -92,7 +92,6 @@ class Schema
                             Forms\Components\Select::make('tags')
                                 ->label('Tag')
                                 ->multiple()
-                                ->tags()
                                 ->placeholder('Tambahkan tag')
                                 ->columnSpanFull(),
 

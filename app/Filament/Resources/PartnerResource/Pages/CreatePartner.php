@@ -16,7 +16,7 @@ class CreatePartner extends CreateRecord
         return $this->getResource()::getUrl('index');
     }
 
-    protected function getBreadcrumbs(): array
+    public function getBreadcrumbs(): array
     {
         return [
             __('Dashboard') => \App\Filament\Support\Breadcrumbs::panelDashboardUrl(),
