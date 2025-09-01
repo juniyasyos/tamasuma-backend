@@ -10,12 +10,19 @@ class AchievementPolicy
 {
     use HandlesAuthorization;
 
+    private function isAdmin(User $user): bool
+    {
+        // Consider both role name variations; adjust if your roles differ
+        return method_exists($user, 'hasRole') && ($user->hasRole('super_admin') || $user->hasRole('Admin'));
+    }
+
     /**
      * Determine whether the user can view any models.
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_achievement');
+        // Admins can view all; otherwise rely on explicit permission
+        return $this->isAdmin($user) || $user->can('view_any_achievement');
     }
 
     /**
@@ -23,7 +30,16 @@ class AchievementPolicy
      */
     public function view(User $user, Achievement $achievement): bool
     {
-        return $user->can('view_achievement');
+        if ($this->isAdmin($user) || $user->can('view_achievement')) {
+            return true;
+        }
+
+        // Self-scope: owner can view own achievement
+        if ($achievement->user_id === $user->id) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -31,7 +47,8 @@ class AchievementPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create_achievement');
+        // Admins can create for anyone; others may create for themselves (self-scope)
+        return $this->isAdmin($user) || $user->can('create_achievement') || $user->can('create_achievement_self');
     }
 
     /**
@@ -39,7 +56,19 @@ class AchievementPolicy
      */
     public function update(User $user, Achievement $achievement): bool
     {
-        return $user->can('update_achievement');
+        if ($this->isAdmin($user) || $user->can('update_achievement')) {
+            return true;
+        }
+
+        // Self can update only if owner AND created via self
+        if ($achievement->user_id === $user->id) {
+            // When self-scope permission exists, enforce it; otherwise default allow for self-created only
+            $hasSelfPerm = $user->can('update_achievement_self');
+            return ($hasSelfPerm || ! $user->can('update_achievement'))
+                && ($achievement->created_via === 'self');
+        }
+
+        return false;
     }
 
     /**
@@ -47,7 +76,18 @@ class AchievementPolicy
      */
     public function delete(User $user, Achievement $achievement): bool
     {
-        return $user->can('delete_achievement');
+        if ($this->isAdmin($user) || $user->can('delete_achievement')) {
+            return true;
+        }
+
+        // Self can delete only if owner AND created via self
+        if ($achievement->user_id === $user->id) {
+            $hasSelfPerm = $user->can('delete_achievement_self');
+            return ($hasSelfPerm || ! $user->can('delete_achievement'))
+                && ($achievement->created_via === 'self');
+        }
+
+        return false;
     }
 
     /**
@@ -55,7 +95,7 @@ class AchievementPolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_achievement');
+        return $this->isAdmin($user) || $user->can('delete_any_achievement');
     }
 
     /**
@@ -63,7 +103,7 @@ class AchievementPolicy
      */
     public function forceDelete(User $user, Achievement $achievement): bool
     {
-        return $user->can('force_delete_achievement');
+        return $this->isAdmin($user) || $user->can('force_delete_achievement');
     }
 
     /**
@@ -71,7 +111,7 @@ class AchievementPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_achievement');
+        return $this->isAdmin($user) || $user->can('force_delete_any_achievement');
     }
 
     /**
@@ -79,7 +119,7 @@ class AchievementPolicy
      */
     public function restore(User $user, Achievement $achievement): bool
     {
-        return $user->can('restore_achievement');
+        return $this->isAdmin($user) || $user->can('restore_achievement');
     }
 
     /**
@@ -87,7 +127,7 @@ class AchievementPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_achievement');
+        return $this->isAdmin($user) || $user->can('restore_any_achievement');
     }
 
     /**
@@ -95,7 +135,7 @@ class AchievementPolicy
      */
     public function replicate(User $user, Achievement $achievement): bool
     {
-        return $user->can('replicate_achievement');
+        return $this->isAdmin($user) || $user->can('replicate_achievement');
     }
 
     /**
@@ -103,6 +143,6 @@ class AchievementPolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->can('reorder_achievement');
+        return $this->isAdmin($user) || $user->can('reorder_achievement');
     }
 }
