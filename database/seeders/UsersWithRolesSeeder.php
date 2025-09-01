@@ -11,47 +11,45 @@ use Illuminate\Support\Str;
 class UsersWithRolesSeeder extends Seeder
 {
     /**
-     * Seed demo users for every role found.
+     * Seed exactly 5 demo users:
+     * - Super Admin (role: super_admin)
+     * - Admin (role: Admin)
+     * - Pengajar (role: Pengajar)
+     * - Pelajar (role: Pelajar)
+     * - User tanpa role
      */
     public function run(): void
     {
         DB::transaction(function () {
-            $roleModel = ShieldUtils::getRoleModel();
-            $allRoles = $roleModel::query()->orderBy('name')->get(['id', 'name', 'guard_name']);
+            // Ensure base roles exist (seed Shield first in DatabaseSeeder order)
+            $superRole = ShieldUtils::getSuperAdminName() ?: 'super_admin';
 
-            foreach ($allRoles as $role) {
-                $slug = Str::slug($role->name, '.');
-                $email = $slug . '@example.com';
+            $spec = [
+                ['name' => 'Super Admin', 'email' => 'super.admin@example.com', 'role' => $superRole],
+                ['name' => 'Admin',       'email' => 'admin@example.com',       'role' => 'Admin'],
+                ['name' => 'Pengajar',    'email' => 'pengajar@example.com',    'role' => 'Pengajar'],
+                ['name' => 'Pelajar',     'email' => 'pelajar@example.com',     'role' => 'Pelajar'],
+                ['name' => 'Tanpa Role',  'email' => 'user@example.com',        'role' => null],
+            ];
 
+            foreach ($spec as $row) {
                 /** @var User $user */
                 $user = User::query()->firstOrCreate(
-                    ['email' => $email],
+                    ['email' => $row['email']],
                     [
-                        'name' => Str::headline($role->name),
-                        'password' => 'password',
+                        'name' => $row['name'],
+                        'password' => 'password', // cast to hashed by model
                         'email_verified_at' => now(),
                     ]
                 );
 
-                if (! $user->hasRole($role->name, $role->guard_name)) {
-                    $user->assignRole($role->name);
+                // Sync to single role (or none)
+                if ($row['role']) {
+                    $user->syncRoles([$row['role']]);
+                } else {
+                    $user->syncRoles([]); // ensure no roles
                 }
-            }
-
-            // Ensure a dedicated super admin demo account exists
-            $superName = ShieldUtils::getSuperAdminName() ?: 'super_admin';
-            $super = User::query()->firstOrCreate(
-                ['email' => 'super.admin@example.com'],
-                [
-                    'name' => 'Super Admin',
-                    'password' => 'password',
-                    'email_verified_at' => now(),
-                ]
-            );
-            if (! $super->hasRole($superName)) {
-                $super->assignRole($superName);
             }
         });
     }
 }
-
