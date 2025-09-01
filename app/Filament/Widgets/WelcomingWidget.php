@@ -98,6 +98,9 @@ class WelcomingWidget extends Widget
         }
 
         $avatar = method_exists($user, 'getFilamentAvatarUrl') ? ($user->getFilamentAvatarUrl() ?: null) : null;
+        if (! $avatar && $user) {
+            $avatar = 'https://ui-avatars.com/api/?name=' . urlencode($user->name);
+        }
         $unread = method_exists($user, 'unreadNotifications') ? (int) $user->unreadNotifications()->count() : 0;
         $has2fa = method_exists($user, 'hasEnabledTwoFactor') ? (bool) $user->hasEnabledTwoFactor() : false;
         $emailVerified = method_exists($user, 'hasVerifiedEmail') ? (bool) $user->hasVerifiedEmail() : true;
