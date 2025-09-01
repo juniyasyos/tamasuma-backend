@@ -3,9 +3,9 @@
         <div class="flex flex-col gap-4">
             <div class="flex items-center gap-4">
                 @if ($avatar)
-                    <img src="{{ $avatar }}" alt="Avatar" class="h-12 w-12 rounded-full ring-2 ring-primary-200 dark:ring-primary-900" />
+                    <img src="{{ $avatar }}" alt="Avatar" class="h-20 w-20 rounded-full ring-2 ring-primary-200 dark:ring-primary-900" />
                 @else
-                    <div class="h-12 w-12 rounded-full bg-primary-600/10 text-primary-600 grid place-items-center font-semibold">
+                    <div class="h-20 w-20 rounded-full bg-primary-600/10 text-primary-600 grid place-items-center font-semibold">
                         {{ str($user->name)->substr(0,1)->upper() }}
                     </div>
                 @endif

@@ -23,6 +23,7 @@ use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Columns\Layout\Stack;
+use Filament\Tables\Columns\Layout\Panel;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -39,6 +40,8 @@ class Table extends UserResource
     {
         return $table
             ->recordUrl(fn ($record) => static::getUrl('view', ['record' => $record]))
+            ->persistFiltersInSession()
+            ->persistSearchInSession()
             ->columns([
                 Split::make([
                     ImageColumn::make('avatar_url')
@@ -74,9 +77,35 @@ class Table extends UserResource
 
                 // Kolom ringkas untuk mobile
                 Stack::make([
-                    TextColumn::make('email')->icon('heroicon-m-envelope'),
-                    TextColumn::make('roles.name')->label('Roles')->badge()->color('info')->separator(','),
+                    TextColumn::make('email')
+                        ->icon('heroicon-m-envelope')
+                        ->listWithLineBreaks()
+                        ->limit(32),
+                    TextColumn::make('roles.name')
+                        ->label('Roles')
+                        ->badge()
+                        ->color('info')
+                        ->separator(',')
+                        ->limitList(2)
+                        ->tooltip(fn ($state) => is_array($state) ? implode(', ', $state) : $state),
                 ])->visibleFrom('sm')->hiddenFrom('md'),
+
+                // Panel detail yang dapat dibuka pada layar kecil
+                Panel::make([
+                    TextColumn::make('created_at')
+                        ->label('Dibuat')
+                        ->since()
+                        ->icon('heroicon-m-clock'),
+                    TextColumn::make('email_verified_at')
+                        ->label('Verifikasi Email')
+                        ->formatStateUsing(fn($state) => $state ? 'Terverifikasi' : 'Belum')
+                        ->badge()
+                        ->colors([
+                            'success' => fn($state) => (bool) $state,
+                            'warning' => fn($state) => ! (bool) $state,
+                        ])
+                        ->icon(fn($state) => $state ? 'heroicon-m-check-badge' : 'heroicon-m-exclamation-triangle'),
+                ])->collapsed()->visibleFrom('sm')->hiddenFrom('md'),
             ])
             ->defaultSort('name')
             ->filters([
