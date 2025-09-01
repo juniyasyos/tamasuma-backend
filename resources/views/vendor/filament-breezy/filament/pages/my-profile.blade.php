@@ -50,6 +50,9 @@
         ->all();
 
     $avatar = method_exists($user, 'getFilamentAvatarUrl') ? ($user->getFilamentAvatarUrl() ?: null) : null;
+    if (!$avatar && $user) {
+        $avatar = 'https://ui-avatars.com/api/?name=' . urlencode($user->name);
+    }
     $roles = method_exists($user, 'getRoleNames') ? $user->getRoleNames()->all() : [];
     $emailVerified = method_exists($user, 'hasVerifiedEmail') ? $user->hasVerifiedEmail() : true;
     $has2fa = method_exists($user, 'hasEnabledTwoFactor') ? $user->hasEnabledTwoFactor() : false;
@@ -62,10 +65,10 @@
                 <div class="flex items-center gap-4">
                     @if ($avatar)
                         <img src="{{ $avatar }}" alt="Avatar"
-                            class="h-16 w-16 rounded-full ring-2 ring-amber-300 dark:ring-amber-700" />
+                            class="h-20 w-20 rounded-full ring-2 ring-primary-200 dark:ring-primary-900" />
                     @else
                         <div
-                            class="h-16 w-16 rounded-full bg-amber-600/10 text-amber-600 grid place-items-center text-2xl font-semibold">
+                            class="h-20 w-20 rounded-full bg-primary-600/10 text-primary-600 dark:bg-primary-400/10 dark:text-primary-400 grid place-items-center font-semibold">
                             {{ str($user->name)->substr(0, 1)->upper() }}
                         </div>
                     @endif
