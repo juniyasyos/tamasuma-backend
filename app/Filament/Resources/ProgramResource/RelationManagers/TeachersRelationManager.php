@@ -6,6 +6,7 @@ use App\Models\User;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class TeachersRelationManager extends RelationManager
 {
@@ -27,7 +28,7 @@ class TeachersRelationManager extends RelationManager
                 Tables\Actions\AttachAction::make()
                     ->label('Tambah Pengajar')
                     ->preloadRecordSelect()
-                    ->recordSelectOptions(fn () => User::role('Pengajar')
+                    ->recordSelectOptionsQuery(fn(Builder $query) => $query
                         ->orderBy('name')
                         ->pluck('name', 'id')),
             ])
