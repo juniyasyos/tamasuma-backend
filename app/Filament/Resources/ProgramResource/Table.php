@@ -21,35 +21,38 @@ use Filament\Notifications\Notification;
 use App\Models\Enrollment;
 use Carbon\Carbon;
 
-    class Table extends ProgramResource
+class Table extends ProgramResource
     {
         public static function make(FilamentTable $table): FilamentTable
         {
-        // Common authorization closures for cleaner reuse
-        $canUpdate = fn(Program $record): bool => (bool) (Auth::user()?->can('update', $record));
-        $canReplicate = fn(Program $record): bool => (bool) (Auth::user()?->can('replicate', $record));
-        $canPublish = fn(Program $record): bool => (bool) (Auth::user()?->can('publish_program'));
-        $canUnpublish = fn(Program $record): bool => (bool) (Auth::user()?->can('unpublish_program'));
-        $hasExternalLink = fn(Program $record): bool => $record->source === 'external' && filled($record->external_url);
-        $adminOpsCount = function (Program $record) use ($canPublish, $canUnpublish, $hasExternalLink, $canReplicate): int {
-            return (int) $canPublish($record)
-                + (int) $canUnpublish($record)
-                + (int) $hasExternalLink($record)
-                + (int) $canReplicate($record);
-        };
+            $perm = self::permissionClosures();
 
-        return $table
-            ->modifyQueryUsing(function (Builder $query): Builder {
-                $user = Auth::user();
-                if (! $user || ! $user->can('view_unpublished_program')) {
-                    $query->where('is_published', true);
-                }
-                return $query;
-            })
-            ->heading('Daftar Program')
-            ->description('Kelola program pembelajaran internal maupun eksternal.')
-            ->recordUrl(fn(Model $record) => ProgramResource::getUrl('view', ['record' => $record]))
-            ->columns([
+            return $table
+                ->modifyQueryUsing(self::visibilityScope())
+                ->heading('Daftar Program')
+                ->description('Kelola program pembelajaran internal maupun eksternal.')
+                ->recordUrl(fn(Model $record) => ProgramResource::getUrl('view', ['record' => $record]))
+                ->columns(self::columns())
+                ->defaultSort('created_at', 'desc')
+                ->groups(self::groups())
+                ->filters(self::filters())
+                ->actions(self::actions($perm))
+                ->bulkActions([])
+                ->emptyStateHeading('Belum ada program')
+                ->emptyStateDescription('Buat program pertama kamu untuk mulai mengelola konten pembelajaran.')
+                ->emptyStateActions([
+                    Tables\Actions\CreateAction::make()->label('Buat Program'),
+                ])
+                ->paginated([10, 25, 50])
+                ->deferLoading();
+        }
+
+        /**
+         * Table header and record columns.
+         */
+        private static function columns(): array
+        {
+            return [
                 // Public-friendly columns (visible to all with access)
                 TextColumn::make('title')
                     ->label('Judul')
@@ -192,13 +195,26 @@ use Carbon\Carbon;
                         return '-';
                     })
                     ->toggleable(isToggledHiddenByDefault: false),
-            ])
-            ->defaultSort('created_at', 'desc')
-            ->groups([
+            ];
+        }
+
+        /**
+         * Table grouping rules.
+         */
+        private static function groups(): array
+        {
+            return [
                 Tables\Grouping\Group::make('learningArea.name')->label('Kelompok Bidang')->collapsible(),
                 Tables\Grouping\Group::make('level')->label('Kelompok Level')->collapsible(),
-            ])
-            ->filters([
+            ];
+        }
+
+        /**
+         * Table filters.
+         */
+        private static function filters(): array
+        {
+            return [
                 TernaryFilter::make('enrolled_by_me')
                     ->label('Keikutsertaan')
                     ->placeholder('Semua Program')
@@ -267,26 +283,17 @@ use Carbon\Carbon;
                         false => 'Belum / Berjalan',
                         default => null,
                     }),
+            ];
+        }
 
-                // Filter::make('created_at')
-                //     ->label('Rentang Tanggal')
-                //     ->form([
-                //         Forms\Components\DatePicker::make('from')->label('Dari'),
-                //         Forms\Components\DatePicker::make('until')->label('Sampai'),
-                //     ])
-                //     ->query(function (Builder $query, array $data): Builder {
-                //         return $query
-                //             ->when($data['from'] ?? null, fn($q, $date) => $q->whereDate('created_at', '>=', $date))
-                //             ->when($data['until'] ?? null, fn($q, $date) => $q->whereDate('created_at', '<=', $date));
-                //     })
-                //     ->indicateUsing(function (array $data): array {
-                //         $indicators = [];
-                //         if ($data['from'] ?? null) $indicators[] = Tables\Filters\Indicator::make('Dari ' . $data['from']);
-                //         if ($data['until'] ?? null) $indicators[] = Tables\Filters\Indicator::make('Sampai ' . $data['until']);
-                //         return $indicators;
-                //     }),
-            ])
-            ->actions([
+        /**
+         * Row actions, including grouped and single-state variants.
+         */
+        private static function actions(array $perm): array
+        {
+            [$canUpdate, $canReplicate, $canPublish, $canUnpublish, $hasExternalLink, $adminOpsCount] = $perm;
+
+            return [
                 ViewAction::make('detail')
                     ->label('Detail')
                     ->icon('heroicon-o-eye')->color('gray')
@@ -427,7 +434,7 @@ use Carbon\Carbon;
                             $data['is_published'] = false;
                             return $data;
                         })
-                        ->successNotificationTitle('Program diduplikasi (status: draft).'),
+                    ->successNotificationTitle('Program diduplikasi (status: draft).'),
                 ])
                     ->visible(fn(Program $record): bool => $adminOpsCount($record) > 1)
                     ->label('Lainnya')
@@ -474,14 +481,42 @@ use Carbon\Carbon;
                         return $data;
                     })
                     ->successNotificationTitle('Program diduplikasi (status: draft).'),
-            ])
-            ->bulkActions([])
-            ->emptyStateHeading('Belum ada program')
-            ->emptyStateDescription('Buat program pertama kamu untuk mulai mengelola konten pembelajaran.')
-            ->emptyStateActions([
-                Tables\Actions\CreateAction::make()->label('Buat Program'),
-            ])
-            ->paginated([10, 25, 50])
-            ->deferLoading();
+            ];
+        }
+
+        /**
+         * Query scope to hide unpublished programs for users without permission.
+         */
+        private static function visibilityScope(): \Closure
+        {
+            return function (Builder $query): Builder {
+                $user = Auth::user();
+                if (! $user || ! $user->can('view_unpublished_program')) {
+                    $query->where('is_published', true);
+                }
+                return $query;
+            };
+        }
+
+        /**
+         * Shared permission and helper closures used by actions.
+         *
+         * @return array{0:\Closure,1:\Closure,2:\Closure,3:\Closure,4:\Closure,5:\Closure}
+         */
+        private static function permissionClosures(): array
+        {
+            $canUpdate = fn(Program $record): bool => (bool) (Auth::user()?->can('update', $record));
+            $canReplicate = fn(Program $record): bool => (bool) (Auth::user()?->can('replicate', $record));
+            $canPublish = fn(Program $record): bool => (bool) (Auth::user()?->can('publish_program'));
+            $canUnpublish = fn(Program $record): bool => (bool) (Auth::user()?->can('unpublish_program'));
+            $hasExternalLink = fn(Program $record): bool => $record->source === 'external' && filled($record->external_url);
+            $adminOpsCount = function (Program $record) use ($canPublish, $canUnpublish, $hasExternalLink, $canReplicate): int {
+                return (int) $canPublish($record)
+                    + (int) $canUnpublish($record)
+                    + (int) $hasExternalLink($record)
+                    + (int) $canReplicate($record);
+            };
+
+            return [$canUpdate, $canReplicate, $canPublish, $canUnpublish, $hasExternalLink, $adminOpsCount];
+        }
     }
-}
