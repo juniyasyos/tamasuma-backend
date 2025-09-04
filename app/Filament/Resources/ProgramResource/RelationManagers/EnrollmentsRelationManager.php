@@ -47,6 +47,7 @@ class EnrollmentsRelationManager extends RelationManager
                                     ->pluck('user_id');
 
                                 return User::query()
+                                    ->role('Pelajar')
                                     ->whereNotIn('id', $already)
                                     ->orderBy('name')
                                     ->pluck('name', 'id');
@@ -59,7 +60,7 @@ class EnrollmentsRelationManager extends RelationManager
                             ->label('Status Awal')
                             ->options([
                                 'requested' => 'Requested',
-                                'active'    => 'Active',
+                                'active' => 'Active',
                             ])
                             ->default('requested')
                             ->required(),
@@ -84,19 +85,20 @@ class EnrollmentsRelationManager extends RelationManager
 
                         if ($exists) {
                             Notification::make()->title('Pengguna sudah terdaftar di program ini.')->warning()->send();
+
                             return;
                         }
 
                         Enrollment::create([
-                            'program_id'  => $owner->getKey(),
-                            'user_id'     => $data['user_id'],
-                            'status'      => $data['status'],
-                            'requested_at'=> now(),
+                            'program_id' => $owner->getKey(),
+                            'user_id' => $data['user_id'],
+                            'status' => $data['status'],
+                            'requested_at' => now(),
                             'approved_at' => $data['status'] === 'active' ? now() : null,
                             'enrolled_at' => $data['status'] === 'active'
                                 ? ($data['enrolled_at'] ?? now()->toDateString())
                                 : null,
-                            'notes'       => $data['notes'] ?? null,
+                            'notes' => $data['notes'] ?? null,
                         ]);
 
                         Notification::make()->title('Pendaftar ditambahkan')->success()->send();
@@ -115,7 +117,7 @@ class EnrollmentsRelationManager extends RelationManager
                             ->where('program_id', $owner->getKey())
                             ->where('status', 'requested')
                             ->update([
-                                'status'      => 'active',
+                                'status' => 'active',
                                 'approved_at' => now(),
                                 'enrolled_at' => now()->toDateString(),
                                 'rejected_at' => null,
@@ -141,7 +143,7 @@ class EnrollmentsRelationManager extends RelationManager
                             ->where('program_id', $owner->getKey())
                             ->where('status', 'active')
                             ->update([
-                                'status'      => 'requested',
+                                'status' => 'requested',
                                 'approved_at' => null,
                                 'enrolled_at' => null,
                             ]);
@@ -169,7 +171,7 @@ class EnrollmentsRelationManager extends RelationManager
                                 'enrolled_at', 'completed_at', 'notes',
                             ]);
 
-                        $filename = 'enrollments_' . $owner->id . '_' . now()->format('Ymd_His') . '.csv';
+                        $filename = 'enrollments_'.$owner->id.'_'.now()->format('Ymd_His').'.csv';
 
                         return new StreamedResponse(function () use ($rows) {
                             $handle = fopen('php://output', 'w');
@@ -194,7 +196,7 @@ class EnrollmentsRelationManager extends RelationManager
                             }
                             fclose($handle);
                         }, 200, [
-                            'Content-Type'        => 'text/csv',
+                            'Content-Type' => 'text/csv',
                             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
                         ]);
                     }),
@@ -218,16 +220,16 @@ class EnrollmentsRelationManager extends RelationManager
                 TextColumn::make('status')->label('Status')->badge()
                     ->icon(fn (string $state) => match ($state) {
                         'requested' => 'heroicon-o-question-mark-circle',
-                        'active'    => 'heroicon-o-check-circle',
+                        'active' => 'heroicon-o-check-circle',
                         'completed' => 'heroicon-o-trophy',
-                        'dropped'   => 'heroicon-o-x-circle',
-                        default     => 'heroicon-o-ellipsis-horizontal-circle',
+                        'dropped' => 'heroicon-o-x-circle',
+                        default => 'heroicon-o-ellipsis-horizontal-circle',
                     })
                     ->colors([
                         'warning' => 'requested',
                         'success' => 'active',
                         'primary' => 'completed',
-                        'gray'    => 'dropped',
+                        'gray' => 'dropped',
                     ])
                     ->sortable(),
                 TextColumn::make('requested_at')->label('Diminta')->since()->toggleable(isToggledHiddenByDefault: true),
@@ -242,9 +244,9 @@ class EnrollmentsRelationManager extends RelationManager
             ->filters([
                 SelectFilter::make('status')->label('Status')->options([
                     'requested' => 'Requested',
-                    'active'    => 'Active',
+                    'active' => 'Active',
                     'completed' => 'Completed',
-                    'dropped'   => 'Dropped',
+                    'dropped' => 'Dropped',
                 ])->indicator('Status'),
 
                 Filter::make('date_range')->label('Rentang Tanggal')
@@ -259,8 +261,13 @@ class EnrollmentsRelationManager extends RelationManager
                     })
                     ->indicateUsing(function (array $data): array {
                         $i = [];
-                        if ($data['from']  ?? null) $i[] = Tables\Filters\Indicator::make('Dari ' . $data['from']);
-                        if ($data['until'] ?? null) $i[] = Tables\Filters\Indicator::make('Sampai ' . $data['until']);
+                        if ($data['from'] ?? null) {
+                            $i[] = Tables\Filters\Indicator::make('Dari '.$data['from']);
+                        }
+                        if ($data['until'] ?? null) {
+                            $i[] = Tables\Filters\Indicator::make('Sampai '.$data['until']);
+                        }
+
                         return $i;
                     }),
             ])
@@ -273,11 +280,11 @@ class EnrollmentsRelationManager extends RelationManager
                     ->requiresConfirmation()->modalHeading('Setujui permohonan?')
                     ->action(function (Enrollment $record, array $data) {
                         $record->update([
-                            'status'      => 'active',
+                            'status' => 'active',
                             'approved_at' => now(),
                             'rejected_at' => null,
                             'enrolled_at' => now()->toDateString(),
-                            'notes'       => $data['notes'] ?? $record->notes,
+                            'notes' => $data['notes'] ?? $record->notes,
                         ]);
                         Notification::make()->title('Permohonan disetujui')->success()->send();
                     }),
@@ -288,9 +295,9 @@ class EnrollmentsRelationManager extends RelationManager
                     ->requiresConfirmation()->modalHeading('Tolak permohonan?')
                     ->action(function (Enrollment $record, array $data) {
                         $record->update([
-                            'status'      => 'dropped',
+                            'status' => 'dropped',
                             'rejected_at' => now(),
-                            'notes'       => trim(($record->notes ?? '') . PHP_EOL . 'Rejected: ' . $data['reason']),
+                            'notes' => trim(($record->notes ?? '').PHP_EOL.'Rejected: '.$data['reason']),
                         ]);
                         Notification::make()->title('Permohonan ditolak')->warning()->send();
                     }),
@@ -301,10 +308,10 @@ class EnrollmentsRelationManager extends RelationManager
                     ->requiresConfirmation()->modalHeading('Batalkan penyetujuan?')
                     ->action(function (Enrollment $record, array $data) {
                         $record->update([
-                            'status'      => 'requested',
+                            'status' => 'requested',
                             'approved_at' => null,
                             'enrolled_at' => null,
-                            'notes'       => $data['notes'] ?? $record->notes,
+                            'notes' => $data['notes'] ?? $record->notes,
                         ]);
                         Notification::make()->title('Penyetujuan dibatalkan')->warning()->send();
                     }),
@@ -314,7 +321,7 @@ class EnrollmentsRelationManager extends RelationManager
                     ->requiresConfirmation()
                     ->action(function (Enrollment $record) {
                         $record->update([
-                            'status'       => 'completed',
+                            'status' => 'completed',
                             'completed_at' => now()->toDateString(),
                         ]);
                         Notification::make()->title('Enrolmen selesai')->success()->send();
@@ -334,7 +341,7 @@ class EnrollmentsRelationManager extends RelationManager
                             $updated = Enrollment::whereIn('id', $ids)
                                 ->where('status', 'requested')
                                 ->update([
-                                    'status'      => 'active',
+                                    'status' => 'active',
                                     'approved_at' => now(),
                                     'enrolled_at' => now()->toDateString(),
                                     'rejected_at' => null,
@@ -353,12 +360,12 @@ class EnrollmentsRelationManager extends RelationManager
                             $updated = Enrollment::whereIn('id', $ids)
                                 ->where('status', 'requested')
                                 ->update([
-                                    'status'      => 'dropped',
+                                    'status' => 'dropped',
                                     'rejected_at' => now(),
                                 ]);
                             // Tambah catatan
                             Enrollment::whereIn('id', $ids)->update([
-                                'notes' => DB::raw("concat(coalesce(notes,''), '\nRejected: " . addslashes($data['reason']) . "')"),
+                                'notes' => DB::raw("concat(coalesce(notes,''), '\nRejected: ".addslashes($data['reason'])."')"),
                             ]);
 
                             Notification::make()->title("{$updated} permohonan ditolak")->warning()->send();
@@ -374,7 +381,7 @@ class EnrollmentsRelationManager extends RelationManager
                             $updated = Enrollment::whereIn('id', $ids)
                                 ->where('status', 'active')
                                 ->update([
-                                    'status'      => 'requested',
+                                    'status' => 'requested',
                                     'approved_at' => null,
                                     'enrolled_at' => null,
                                 ]);
@@ -391,6 +398,7 @@ class EnrollmentsRelationManager extends RelationManager
     protected function canManage(Enrollment $record): bool
     {
         $u = Auth::user();
+
         return $u && ($u->can('update_any_program') || $u->can('update', $record->program));
     }
 }

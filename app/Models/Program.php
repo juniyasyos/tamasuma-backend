@@ -5,13 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
-use App\Models\Teacher;
 
 class Program extends Model
 {
     use HasFactory;
 
     protected $guarded = ['id'];
+
     protected $hidden = ['created_at', 'updated_at'];
 
     protected $fillable = [
@@ -46,19 +46,23 @@ class Program extends Model
 
     public function enrollments()
     {
-        return $this->hasMany(\App\Models\Enrollment::class);
+        return $this->hasMany(\App\Models\Enrollment::class)
+            ->whereHas('user', fn ($q) => $q->role('Pelajar'));
     }
 
-    public function users()
+    public function students()
     {
         return $this->belongsToMany(\App\Models\User::class, 'enrollments')
             ->withPivot(['status', 'enrolled_at', 'completed_at', 'notes'])
-            ->withTimestamps();
+            ->withTimestamps()
+            ->role('Pelajar');
     }
 
     public function teachers()
     {
-        return $this->belongsToMany(Teacher::class);
+        return $this->belongsToMany(\App\Models\User::class, 'program_teacher')
+            ->withTimestamps()
+            ->role('Pengajar');
     }
 
     protected static function booted(): void
