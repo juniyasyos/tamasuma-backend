@@ -39,7 +39,7 @@ class Infolist extends ProgramResource
                                                     ->label(fn($record) => $record->is_published ? 'Terpublikasi' : 'Draft')
                                                     ->icon(fn($record) => $record->is_published ? 'heroicon-o-check-circle' : 'heroicon-o-pencil')
                                                     ->color(fn($record) => $record->is_published ? 'success' : 'gray')
-                                                    ->disabled() // hanya sebagai badge, tidak bisa diklik
+                                                    ->disabled()
                                             ),
 
                                         // Status + level ringkas dalam 1 kolom
@@ -170,6 +170,19 @@ class Infolist extends ProgramResource
                                     $r->enrollments()
                                         ->with('user')
                                         ->latest('enrolled_at')
+                                        ->get()
+                                ),
+                        ]),
+                    InfoTab::make('Pengajar')
+                        ->icon('heroicon-o-academic-cap')
+                        ->schema([
+                            InfoViewEntry::make('teachers')
+                                ->label(false)
+                                ->view('filament/programs/teachers-inline')
+                                ->getStateUsing(
+                                    fn(\App\Models\Program $r) =>
+                                    $r->teachers()
+                                        ->orderBy('name')
                                         ->get()
                                 ),
                         ]),

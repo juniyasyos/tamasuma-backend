@@ -101,7 +101,7 @@ class ShieldSeeder extends Seeder
             'view_unpublished_program',
             'publish_program',
             'unpublish_program',
-            'request_enrollment', // dipakai di Pelajar pada contoh sebelumnya
+            // 'request_enrollment', // dipakai di Pelajar pada contoh sebelumnya
             'receive_program_enrollment_request', // target penerima notifikasi pengajuan enrolmen
         ];
 

@@ -18,12 +18,18 @@ class ViewProgram extends ViewRecord
 {
     protected static string $resource = ProgramResource::class;
 
-    // Hide only Enrollments relation manager on the view page
+    // Hide Enrollments & Teachers relation managers on the view page
     protected function getAllRelationManagers(): array
     {
         return array_filter(
             static::getResource()::getRelations(),
-            fn ($manager) => $this->normalizeRelationManagerClass($manager) !== \App\Filament\Resources\ProgramResource\RelationManagers\EnrollmentsRelationManager::class,
+            function ($manager) {
+                $normalized = $this->normalizeRelationManagerClass($manager);
+                return ! in_array($normalized, [
+                    \App\Filament\Resources\ProgramResource\RelationManagers\EnrollmentsRelationManager::class,
+                    \App\Filament\Resources\ProgramResource\RelationManagers\TeachersRelationManager::class,
+                ], true);
+            },
         );
     }
 
