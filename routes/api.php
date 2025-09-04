@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\LearningAreaController;
 use App\Http\Controllers\Api\ModulesController;
 use App\Http\Controllers\Api\PartnersController;
+use App\Http\Controllers\Api\SpeakersController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -25,4 +26,7 @@ Route::prefix('v1')->group(function () {
 
     // Partners
     Route::get('partners', [PartnersController::class, 'index']);
+
+    // Speakers
+    Route::get('speakers', [SpeakersController::class, 'index']);
 });
