@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use App\Models\Teacher;
 
 class Program extends Model
 {
@@ -53,6 +54,11 @@ class Program extends Model
         return $this->belongsToMany(\App\Models\User::class, 'enrollments')
             ->withPivot(['status', 'enrolled_at', 'completed_at', 'notes'])
             ->withTimestamps();
+    }
+
+    public function teachers()
+    {
+        return $this->belongsToMany(Teacher::class);
     }
 
     protected static function booted(): void

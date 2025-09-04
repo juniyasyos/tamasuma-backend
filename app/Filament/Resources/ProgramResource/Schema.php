@@ -62,6 +62,14 @@ class Schema extends ProgramResource
                                             ->live(),
                                     ]),
 
+                                    Select::make('teachers')
+                                        ->label('Pengajar')
+                                        ->relationship('teachers', 'name')
+                                        ->multiple()
+                                        ->preload()
+                                        ->searchable()
+                                        ->native(false),
+
                                     Grid::make(2)->schema([
                                         TextInput::make('title')
                                             ->label('Judul Program')

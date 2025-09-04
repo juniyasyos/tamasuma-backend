@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
                 ShieldSeeder::class,
                 UsersWithRolesSeeder::class,
                 EnrollmentSeeder::class,
+                TeacherSeeder::class,
             ]
         );
     }

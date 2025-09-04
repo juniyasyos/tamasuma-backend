@@ -64,6 +64,7 @@ class ProgramResource extends Resource implements HasShieldPermissions
     {
         return [
             \App\Filament\Resources\ProgramResource\RelationManagers\EnrollmentsRelationManager::class,
+            \App\Filament\Resources\ProgramResource\RelationManagers\TeachersRelationManager::class,
         ];
     }
 
