@@ -26,7 +26,7 @@ class UsersWithRolesSeeder extends Seeder
 
             $spec = [
                 ['name' => 'Super Admin', 'email' => 'super.admin@example.com', 'role' => $superRole],
-                ['name' => 'Admin',       'email' => 'admin@example.com',       'role' => 'Admin'],
+                ['name' => 'Admin',       'email' => 'admin@admin.com',       'role' => 'Admin'],
                 ['name' => 'Pengajar',    'email' => 'pengajar@example.com',    'role' => 'Pengajar'],
                 ['name' => 'Pelajar',     'email' => 'pelajar@example.com',     'role' => 'Pelajar'],
                 ['name' => 'Tanpa Role',  'email' => 'user@example.com',        'role' => null],
