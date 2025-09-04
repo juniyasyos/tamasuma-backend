@@ -19,7 +19,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles, TwoFactorAuthenticatable, HasApiTokens;
+    use HasApiTokens, HasFactory, HasRoles, Notifiable, TwoFactorAuthenticatable;
 
     /**
      * The attributes that are mass assignable.
@@ -79,13 +79,37 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
 
     public function enrollments()
     {
-        return $this->hasMany(\App\Models\Enrollment::class);
+        $relation = $this->hasMany(\App\Models\Enrollment::class);
+
+        if (! $this->hasRole('Pelajar')) {
+            $relation->whereRaw('1 = 0');
+        }
+
+        return $relation;
     }
 
     public function programs()
     {
-        return $this->belongsToMany(\App\Models\Program::class, 'enrollments')
+        $relation = $this->belongsToMany(\App\Models\Program::class, 'enrollments')
             ->withPivot(['status', 'enrolled_at', 'completed_at', 'notes'])
             ->withTimestamps();
+
+        if (! $this->hasRole('Pelajar')) {
+            $relation->whereRaw('1 = 0');
+        }
+
+        return $relation;
+    }
+
+    public function teachingPrograms()
+    {
+        $relation = $this->belongsToMany(\App\Models\Program::class, 'program_teacher')
+            ->withTimestamps();
+
+        if (! $this->hasRole('Pengajar')) {
+            $relation->whereRaw('1 = 0');
+        }
+
+        return $relation;
     }
 }

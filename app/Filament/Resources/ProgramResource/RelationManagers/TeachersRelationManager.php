@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\ProgramResource\RelationManagers;
 
-use Filament\Forms;
+use App\Models\User;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -11,27 +11,28 @@ class TeachersRelationManager extends RelationManager
 {
     protected static string $relationship = 'teachers';
 
-    public function form(Forms\Form $form): Forms\Form
-    {
-        return $form->schema([
-            Forms\Components\TextInput::make('name')->label('Nama')->required()->maxLength(255),
-            Forms\Components\Textarea::make('bio')->label('Bio')->rows(5)->columnSpanFull(),
-        ]);
-    }
-
     public function table(Table $table): Table
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')->label('Nama')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('name')
+                    ->label('Nama')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('email')
+                    ->label('Email')
+                    ->searchable(),
             ])
             ->headerActions([
-                Tables\Actions\AttachAction::make(),
-                Tables\Actions\CreateAction::make(),
+                Tables\Actions\AttachAction::make()
+                    ->label('Tambah Pengajar')
+                    ->preloadRecordSelect()
+                    ->recordSelectOptions(fn () => User::role('Pengajar')
+                        ->orderBy('name')
+                        ->pluck('name', 'id')),
             ])
             ->actions([
                 Tables\Actions\DetachAction::make(),
-                Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\DetachBulkAction::make(),
