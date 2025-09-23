@@ -32,4 +32,49 @@ class Enrollment extends Model
     }
 
     // Notification logic moved to Observer + Service for better testability and reuse.
+
+    /**
+     * Award achievement when program enrollment is completed.
+     * Idempotent: upserts by (user_id, source_type, source_id).
+     */
+    public function awardCompletionAchievement(): Achievement
+    {
+        if ($this->status !== 'completed') {
+            throw new \InvalidArgumentException('Enrollment is not in completed status.');
+        }
+
+        $title = 'Selesai Program: ' . ($this->program?->title ?? 'Tanpa Judul');
+        $achievedAt = $this->completed_at ?: now()->toDateString();
+
+        $attributes = [
+            'user_id'     => $this->user_id,
+            'source_type' => 'Enrollment',
+            'source_id'   => $this->id,
+        ];
+
+        $values = [
+            'title'       => $title,
+            'category'    => 'certificate',
+            'issuer'      => null,
+            'achieved_at' => $achievedAt,
+            'description' => 'Diberikan otomatis karena menyelesaikan program.',
+            'visibility'  => 'private',
+            'created_via' => 'auto',
+            'created_by_id' => null,
+        ];
+
+        // Preserve existing tags; ensure 'program' and 'auto' present
+        $existing = Achievement::query()->where($attributes)->first();
+        if ($existing) {
+            $tags = (array) $existing->tags ?: [];
+            $tags = array_values(array_unique(array_merge($tags, ['program', 'auto'])));
+            $values['tags'] = $tags;
+
+            $existing->fill($values)->save();
+            return $existing->refresh();
+        }
+
+        $values['tags'] = ['program', 'auto'];
+        return Achievement::create(array_merge($attributes, $values));
+    }
 }

@@ -4,7 +4,6 @@ namespace App\Observers;
 
 use App\Models\Enrollment;
 use App\Services\Notifications\EnrollmentNotificationService;
-use App\Services\Achievements\AutoAwardService;
 
 class EnrollmentObserver
 {
@@ -26,7 +25,7 @@ class EnrollmentObserver
         // If status transitions to completed, award achievement (idempotent)
         if ($enrollment->wasChanged('status') && $enrollment->status === 'completed') {
             try {
-                app(AutoAwardService::class)->awardProgramCompleted($enrollment);
+                $enrollment->awardCompletionAchievement();
             } catch (\Throwable $e) {
                 // Silent fail to avoid breaking user flows; consider logging if desired
                 // \Log::warning('Auto-award failed: '.$e->getMessage());
